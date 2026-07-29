@@ -12,62 +12,25 @@
  */
 
 import { SHOP, BUNDLES } from './config.js';
+import { bundleCard, makeMoney } from './bundle-markup.js';
 
 /* ------------------------------------------------------------------ utils */
 
 const $ = (sel, root = document) => root.querySelector(sel);
-const money = (n) =>
-  new Intl.NumberFormat('en-IE', {
-    style: 'currency',
-    currency: SHOP.currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(n);
-
-const CHECK_ICON =
-  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+const money = makeMoney(SHOP.currency);
 
 /* --------------------------------------------------------- render bundles */
 
-function bundleMarkup(bundle) {
-  const featured = bundle.badge ? 'true' : 'false';
-  const saving =
-    bundle.compareAt && bundle.compareAt > bundle.price
-      ? Math.round(100 - (bundle.price / bundle.compareAt) * 100)
-      : null;
-
-  return `
-    <article class="bundle" data-featured="${featured}">
-      ${bundle.badge ? `<span class="bundle__badge">${bundle.badge}</span>` : ''}
-
-      <h3 class="bundle__name">${bundle.name}</h3>
-      <p class="bundle__tagline">${bundle.tagline}</p>
-
-      <p class="bundle__price">
-        <span class="bundle__amount">${money(bundle.price)}</span>
-        ${bundle.compareAt ? `<span class="bundle__compare">${money(bundle.compareAt)}</span>` : ''}
-        ${saving ? `<span class="bundle__save">Save ${saving}%</span>` : ''}
-      </p>
-
-      <ul class="bundle__includes">
-        ${bundle.includes.map((item) => `<li>${CHECK_ICON}<span>${item}</span></li>`).join('')}
-      </ul>
-
-      <button
-        class="btn btn--block${bundle.badge ? '' : ' btn--ghost'}"
-        data-buy="${bundle.id}">
-        <span class="btn__label">Order &mdash; ${money(bundle.price)}</span>
-        <span class="btn__spinner" aria-hidden="true"></span>
-      </button>
-
-      <p class="bundle__foot">Incl. VAT &middot; 14-day returns</p>
-    </article>`;
-}
-
+/**
+ * The cards are normally baked into the HTML by `npm run bundles`, so they are
+ * visible without JavaScript. This only fills them in if that step was missed,
+ * which keeps the page from ever showing an empty bundles section.
+ */
 function renderBundles() {
   const host = $('#bundles');
   if (!host) return;
-  host.innerHTML = BUNDLES.map(bundleMarkup).join('');
+  if (host.querySelector('.bundle')) return; // already server-rendered
+  host.innerHTML = BUNDLES.map((b) => bundleCard(b, money)).join('');
 }
 
 /* ------------------------------------------------------------- checkout */
