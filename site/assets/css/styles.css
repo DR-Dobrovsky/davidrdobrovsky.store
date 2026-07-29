@@ -92,6 +92,39 @@ a:hover { color: var(--accent-hover); }
   border-radius: 3px;
 }
 
+/* ------------------------------------------------------------- utilities ---
+   These exist because the Content-Security-Policy is strict: `style-src 'self'`
+   blocks inline style attributes outright, so anything set with style="..."
+   was silently ignored in production. Keep this list short — if something is
+   needed in more than a couple of places it belongs in a component above. */
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-muted { color: var(--muted); }
+.flush { margin: 0; }
+.mt-lg { margin-top: 2rem; }
+.center { margin-inline: auto; }
+.page-title { font-size: var(--step-3); }
+
+.narrow {
+  max-width: 640px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.fine-print {
+  font-size: var(--step--1);
+  color: var(--muted);
+  margin-top: 2rem;
+}
+.fine-print--loose { margin-top: 2.5rem; }
+
+.cookie__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px; height: 1px;
@@ -276,11 +309,12 @@ a:hover { color: var(--accent-hover); }
 
 .hero__media { aspect-ratio: 4 / 5; }
 
-/* On a phone the hero should not eat the whole screen before the price is
-   visible, so the frame is shallower there. */
+/* On phones the hero gets the full 4:5 frame. A 1:1 crop was tried to keep the
+   price higher up the page, but it made the product too small on exactly the
+   device where the photo has to do the selling. */
 @media (max-width: 899px) {
-  .hero__media { aspect-ratio: 1 / 1; }
-  .hero__media img { aspect-ratio: 1 / 1; }
+  .hero__media { aspect-ratio: 4 / 5; }
+  .hero__media img { aspect-ratio: 4 / 5; }
 }
 
 /* -------------------------------------------------------------- gallery ---- */
@@ -421,15 +455,45 @@ a:hover { color: var(--accent-hover); }
 
 /* ------------------------------------------------------------- science ---- */
 
+/* Six items, so the column count must divide six — otherwise the last row is
+   short and the container background shows through as a grey slab. That is
+   exactly what auto-fit produced: five columns for six items. */
 .specs {
-  display: grid; gap: 1px;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  background: rgba(42, 35, 31, 0.1);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   border: 1px solid rgba(42, 35, 31, 0.1);
   border-radius: var(--radius);
   overflow: hidden;
 }
-.specs > div { background: var(--cream); padding: 1.4rem; }
+
+@media (min-width: 700px) {
+  .specs { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1100px) {
+  .specs { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* Cell borders rather than a 1px gap over a coloured container: the grid can
+   then never reveal a background where a cell is missing. */
+.specs > div {
+  background: var(--cream);
+  padding: 1.4rem;
+  border-inline-start: 1px solid rgba(42, 35, 31, 0.1);
+  border-block-start: 1px solid rgba(42, 35, 31, 0.1);
+}
+.specs > div:first-child { border-inline-start: 0; }
+.specs > div { border-block-start: 0; }
+
+@media (max-width: 699px) {
+  .specs > div:nth-child(odd) { border-inline-start: 0; }
+  .specs > div:nth-child(n + 3) { border-block-start: 1px solid rgba(42, 35, 31, 0.1); }
+}
+
+@media (min-width: 700px) and (max-width: 1099px) {
+  .specs > div:nth-child(3n + 1) { border-inline-start: 0; }
+  .specs > div:nth-child(n + 4) { border-block-start: 1px solid rgba(42, 35, 31, 0.1); }
+}
 .specs dt {
   font-size: var(--step--1); letter-spacing: 0.09em;
   text-transform: uppercase; color: var(--muted);
@@ -439,10 +503,30 @@ a:hover { color: var(--accent-hover); }
 
 /* ------------------------------------------------------------- bundles ---- */
 
+/* Explicit column counts instead of auto-fit. With auto-fit the cards could
+   drop to a single full-width column at awkward in-between widths — a 1000px
+   wide pricing card reads as a broken page. Three narrow cards side by side
+   also make the bundles comparable at a glance, which is the whole point. */
 .bundles {
-  display: grid; gap: clamp(1.2rem, 2.5vw, 1.8rem);
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: grid;
+  gap: clamp(1.2rem, 2.5vw, 1.8rem);
+  grid-template-columns: 1fr;
   align-items: start;
+  /* Keep the cards a readable width on very large monitors. */
+  max-width: 1000px;
+  margin-inline: auto;
+}
+
+@media (min-width: 620px) {
+  .bundles { grid-template-columns: repeat(2, 1fr); }
+  /* Featured card first and spanning both columns reads better than an
+     orphan sitting alone on the second row. */
+  .bundles > .bundle[data-featured='true'] { grid-column: 1 / -1; order: -1; }
+}
+
+@media (min-width: 920px) {
+  .bundles { grid-template-columns: repeat(3, 1fr); }
+  .bundles > .bundle[data-featured='true'] { grid-column: auto; order: 0; }
 }
 
 .bundle {
