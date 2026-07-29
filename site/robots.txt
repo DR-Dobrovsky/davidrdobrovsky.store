@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /thanks.html
+Disallow: /thanks
 
 Sitemap: https://seoulsilk.store/sitemap.xml

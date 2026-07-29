@@ -19,11 +19,16 @@ directory = "./site"
 binding = "ASSETS"
 not_found_handling = "404-page"
 
-# Serve files at exactly the paths we link to. The default
-# ("auto-trailing-slash") strips .html and 307-redirects, so /legal/terms.html
-# became a redirect to /legal/terms — harmless, but it added a hop to every
-# legal link, to the Stripe success_url, and to every URL in sitemap.xml.
-html_handling = "none"
+# Leave html_handling at its default ("auto-trailing-slash").
+#
+# Setting it to "none" looks tempting because it stops .html paths being
+# redirected — but it also switches off directory-index resolution, so "/"
+# stopped mapping to index.html and the homepage returned an empty 404. On
+# phones that empty response showed up as a file download prompt.
+#
+# The redirects it was meant to avoid are instead avoided by linking to the
+# extensionless URLs directly (/legal/terms rather than /legal/terms.html),
+# which Cloudflare serves as 200.
 
 [vars]
 SITE_URL = "https://seoulsilk.store"
