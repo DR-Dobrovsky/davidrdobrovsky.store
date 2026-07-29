@@ -31,8 +31,8 @@ What is still placeholder text:
 - `[COMPANY_NAME]`, `[KBO/BCE]`, `[BE0123.456.789]` and the address in
   `site/legal/` — required by Belgian and EU e-commerce law before selling
 - `hello@seoulsilk.store` — set up the mailbox or change the address
-- product photography in `site/assets/img/` (the page shows labelled
-  placeholders with the required aspect ratios until then)
+- product photography (the page ships neutral gradient stand-ins — see
+  section 2)
 - the reviews section, which is clearly marked and must be replaced with
   genuine reviews or removed
 
@@ -42,7 +42,43 @@ Find everything outstanding:
 grep -rn '\[COMPANY_NAME\]\|\[KBO\|REPLACE_ME' . --exclude-dir=.git
 ```
 
-## 2. Prices and bundles
+## 2. Photos
+
+The page currently ships **neutral gradient stand-ins** so no slot is empty.
+They are abstract on purpose — no invented product, no invented person.
+
+Replacing them is two steps:
+
+```bash
+# 1. drop real photos into site/assets/img/src/ using these exact names:
+#    hero.jpg  in-use.jpg  device.jpg  set.jpg      (4:5, ideally 1600px wide)
+
+npm install          # once, pulls in sharp
+npm run images       # 2. generate every size and format
+```
+
+That produces, per photo, five widths in AVIF, WebP and JPEG, plus the
+`og.jpg` link-preview card and blurred placeholders in
+`assets/css/placeholders.css`. Commit the results — Cloudflare deploys the
+files as they are, there is no build step on their side.
+
+The shot list and advice on sourcing photography is in
+[`site/assets/img/src/README.md`](site/assets/img/src/README.md).
+
+### How the page uses them
+
+- `<picture>` with AVIF → WebP → JPEG, so each browser gets the smallest file
+  it understands
+- `srcset` + `sizes`, so a phone downloads a 400px file instead of a 1600px one
+- `width`/`height` and a reserved 4:5 box, so nothing shifts while loading
+- hero is preloaded and `fetchpriority="high"`; the gallery is `loading="lazy"`
+- on phones the hero frame becomes 1:1 and the gallery turns into a swipeable
+  snap carousel, so the price stays close to the top of the screen
+
+`scripts/make-temp-photos.mjs` regenerates the stand-ins and can be deleted
+once real photography is in place.
+
+## 3. Prices and bundles
 
 Everything lives in **`site/assets/js/config.js`** — the only file with pricing
 logic. Current placeholders:
@@ -58,7 +94,7 @@ your **break-even CPA** (the most you can pay per sale in ads before losing
 money). Update `costPrice` as soon as Korean Skincare Supply approves the
 account and shows real prices.
 
-## 3. Stripe
+## 4. Stripe
 
 1. Create a Stripe account (Belgium) and **activate Bancontact** — it is the
    dominant method locally.
@@ -72,7 +108,7 @@ account and shows real prices.
 5. Add your terms URL in Stripe → Settings → Checkout, so customers accept
    them during payment.
 
-## 4. Deploy — one Worker serves everything
+## 5. Deploy — one Worker serves everything
 
 The root `wrangler.toml` binds `site/` as static assets to the same Worker that
 handles the API. `/api/*` goes to the script, everything else is served as a
@@ -96,7 +132,7 @@ cp worker/.dev.vars.example .dev.vars
 npx wrangler dev                               # http://127.0.0.1:8787
 ```
 
-## 5. Attach the domain
+## 6. Attach the domain
 
 Dashboard → **Workers & Pages → seoulsilk → Domains → Custom Domains**, then add
 **both** `seoulsilk.store` and `www.seoulsilk.store`.
@@ -112,7 +148,7 @@ Two traps worth knowing:
 Then in Stripe → Developers → Webhooks add
 `https://seoulsilk.store/api/webhook` for **`checkout.session.completed`**.
 
-## 6. Fulfilment (manual, by design)
+## 7. Fulfilment (manual, by design)
 
 There is no supplier API, so orders are placed by hand. That is fine at test
 volume and it means you see every order.
@@ -139,7 +175,7 @@ where you buy.
 - [ ] Company registered (KBO/BCE), VAT sorted, OSS if selling across the EU
 - [ ] Every `[placeholder]` in `site/legal/` replaced
 - [ ] Terms reviewed by someone who knows Belgian consumer law
-- [ ] Real product photography in `site/assets/img/`
+- [ ] Real product photography in `site/assets/img/src/`, then `npm run images`
 - [ ] Test payment end to end with a Stripe test card
 - [ ] Reviews section replaced with genuine reviews, or removed —
       never invent them
