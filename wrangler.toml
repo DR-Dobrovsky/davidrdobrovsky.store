@@ -1,0 +1,30 @@
+# Root deployment: ONE Worker serves both the website and the checkout API.
+#
+# Why not a separate Pages project plus a Worker? Because two projects on one
+# domain means two custom-domain setups and a CORS boundary between them. With
+# static assets bound to the same Worker, /api/* is handled by the script and
+# everything else is served from site/ — same origin, no preflight.
+#
+# Deploy:  npx wrangler deploy
+# Secrets: npx wrangler secret put STRIPE_SECRET_KEY
+#          npx wrangler secret put STRIPE_WEBHOOK_SECRET
+
+name = "seoulsilk"
+main = "worker/src/index.js"
+compatibility_date = "2024-11-01"
+
+# The website. Requests that do not match /api/* fall through to these files.
+[assets]
+directory = "./site"
+binding = "ASSETS"
+not_found_handling = "404-page"
+
+[vars]
+SITE_URL = "https://seoulsilk.store"
+ALLOWED_ORIGINS = "https://seoulsilk.store,https://www.seoulsilk.store,http://localhost:8080"
+# Optional: create a Shipping Rate in Stripe and paste its ID here.
+# SHIPPING_RATE_ID = "shr_..."
+
+# Attach the domain in the dashboard under Workers > your worker > Domains,
+# adding BOTH the apex and www as Custom Domains. A wildcard route such as
+# *.seoulsilk.store/* does NOT cover the apex, which is a common trap.
