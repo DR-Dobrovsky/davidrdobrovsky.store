@@ -21,18 +21,26 @@ plus 0.5% if you enable Stripe Tax.
 
 ---
 
-## 1. Rename the brand
+## 1. Still to fill in
 
-`Seoulsilk` is a placeholder. Find and replace across the repo, then change
-`brand` in `site/assets/js/config.js`:
+The brand is **Seoulsilk** and the domain is **seoulsilk.store** — both are
+real, no renaming needed.
+
+What is still placeholder text:
+
+- `[COMPANY_NAME]`, `[KBO/BCE]`, `[BE0123.456.789]` and the address in
+  `site/legal/` — required by Belgian and EU e-commerce law before selling
+- `hello@seoulsilk.store` — set up the mailbox or change the address
+- product photography in `site/assets/img/` (the page shows labelled
+  placeholders with the required aspect ratios until then)
+- the reviews section, which is clearly marked and must be replaced with
+  genuine reviews or removed
+
+Find everything outstanding:
 
 ```bash
-grep -rl 'Seoulsilk' . --exclude-dir=.git | xargs sed -i 's/Seoulsilk/YourBrand/g'
-grep -rl 'seoulsilk.store' . --exclude-dir=.git | xargs sed -i 's/seoulsilk.store/yourdomain.com/g'
+grep -rn '\[COMPANY_NAME\]\|\[KBO\|REPLACE_ME' . --exclude-dir=.git
 ```
-
-Then search for `[COMPANY_NAME]`, `hello@seoulsilk.store` and every other
-`[bracketed]` placeholder in `site/legal/` and fill them in.
 
 ## 2. Prices and bundles
 
