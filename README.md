@@ -26,10 +26,10 @@ plus 0.5% if you enable Stripe Tax.
 
 ```bash
 grep -rl 'Seoulsilk' . --exclude-dir=.git | xargs sed -i 's/Seoulsilk/YourBrand/g'
-grep -rl 'davidrdobrovsky.store' . --exclude-dir=.git | xargs sed -i 's/davidrdobrovsky.store/yourdomain.com/g'
+grep -rl 'seoulsilk.store' . --exclude-dir=.git | xargs sed -i 's/seoulsilk.store/yourdomain.com/g'
 ```
 
-Then search for `[COMPANY_NAME]`, `hello@davidrdobrovsky.store` and every other
+Then search for `[COMPANY_NAME]`, `hello@seoulsilk.store` and every other
 `[bracketed]` placeholder in `site/legal/` and fill them in.
 
 ## 2. Prices and bundles

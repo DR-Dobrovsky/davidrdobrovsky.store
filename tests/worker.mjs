@@ -15,8 +15,8 @@ import worker from '../worker/src/index.js';
 const env = {
   STRIPE_SECRET_KEY: 'sk_test_dummy',
   STRIPE_WEBHOOK_SECRET: 'whsec_testsecret',
-  SITE_URL: 'https://davidrdobrovsky.store',
-  ALLOWED_ORIGINS: 'https://davidrdobrovsky.store',
+  SITE_URL: 'https://seoulsilk.store',
+  ALLOWED_ORIGINS: 'https://seoulsilk.store',
 };
 
 const results = [];
@@ -25,36 +25,36 @@ const check = (label, passed, detail = '') => {
 };
 
 const post = (path, body, headers = {}) =>
-  new Request(`https://davidrdobrovsky.store${path}`, {
+  new Request(`https://seoulsilk.store${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Origin: 'https://davidrdobrovsky.store', ...headers },
+    headers: { 'Content-Type': 'application/json', Origin: 'https://seoulsilk.store', ...headers },
     body: typeof body === 'string' ? body : JSON.stringify(body),
   });
 
 /* -------------------------------------------------- routing & validation */
 
-let res = await worker.fetch(new Request('https://davidrdobrovsky.store/nope'), env);
+let res = await worker.fetch(new Request('https://seoulsilk.store/nope'), env);
 check('unknown route returns 404', res.status === 404);
 
-res = await worker.fetch(new Request('https://davidrdobrovsky.store/api/health'), env);
+res = await worker.fetch(new Request('https://seoulsilk.store/api/health'), env);
 const health = await res.json();
 check('health endpoint reports stripe configured', res.status === 200 && health.stripe === true);
 
 res = await worker.fetch(
-  new Request('https://davidrdobrovsky.store/api/checkout', {
+  new Request('https://seoulsilk.store/api/checkout', {
     method: 'OPTIONS',
-    headers: { Origin: 'https://davidrdobrovsky.store' },
+    headers: { Origin: 'https://seoulsilk.store' },
   }),
   env
 );
 check(
   'CORS preflight allows the published origin',
   res.status === 204 &&
-    res.headers.get('Access-Control-Allow-Origin') === 'https://davidrdobrovsky.store'
+    res.headers.get('Access-Control-Allow-Origin') === 'https://seoulsilk.store'
 );
 
 res = await worker.fetch(
-  new Request('https://davidrdobrovsky.store/api/checkout', {
+  new Request('https://seoulsilk.store/api/checkout', {
     method: 'OPTIONS',
     headers: { Origin: 'https://evil.example' },
   }),
@@ -106,7 +106,7 @@ const orderEvent = JSON.stringify({
       amount_total: 19900,
       currency: 'eur',
       metadata: { bundle: 'ritual' },
-      customer_details: { email: 'buyer@davidrdobrovsky.store', name: 'Test Buyer', phone: '+32...' },
+      customer_details: { email: 'buyer@seoulsilk.store', name: 'Test Buyer', phone: '+32...' },
       shipping_details: {
         name: 'Test Buyer',
         address: { line1: 'Teststraat 1', postal_code: '1000', city: 'Brussels', country: 'BE' },
@@ -134,7 +134,7 @@ console.log = realLog;
 check('valid webhook signature accepted', validAccepted);
 check(
   'paid order is logged for manual fulfilment',
-  logged.some((l) => l.includes('"event":"ORDER"') && l.includes('buyer@davidrdobrovsky.store'))
+  logged.some((l) => l.includes('"event":"ORDER"') && l.includes('buyer@seoulsilk.store'))
 );
 
 res = await worker.fetch(
