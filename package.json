@@ -9,8 +9,12 @@
     "test:site": "node tests/smoke.mjs",
     "test:worker": "node tests/worker.mjs",
     "test:assets": "node tests/assets.mjs",
+    "images": "node scripts/build-images.mjs",
     "preview": "cd site && python3 -m http.server 8080",
     "deploy": "wrangler deploy",
     "tail": "wrangler tail --format pretty"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.3"
   }
 }

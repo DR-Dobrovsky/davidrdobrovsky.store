@@ -22,6 +22,8 @@
 <meta name="theme-color" content="#fbf8f4">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='25' x='4' font-size='24' font-family='Georgia'>S</text></svg>">
 <link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/placeholders.css">
+<link rel="preload" as="image" href="assets/img/hero-800.avif" type="image/avif" fetchpriority="high">
 
 <script type="application/ld+json">
 {
@@ -160,13 +162,37 @@
         </ul>
       </div>
 
-      <div class="hero__media">
-        <!-- Replace with a real photo: assets/img/hero.jpg (4:5, min 1000x1250) -->
-        <div class="ph">
-          <strong>hero.jpg</strong>
-          Device in hand, steam visible, warm daylight.<br>4:5 &middot; min 1000&times;1250
-        </div>
-      </div>
+      <figure class="shot shot--hero hero__media">
+        <picture>
+          <source
+            type="image/avif"
+            sizes="(min-width: 900px) 46vw, 100vw"
+            srcset="assets/img/hero-400.avif 400w,
+                    assets/img/hero-600.avif 600w,
+                    assets/img/hero-800.avif 800w,
+                    assets/img/hero-1200.avif 1200w,
+                    assets/img/hero-1600.avif 1600w">
+          <source
+            type="image/webp"
+            sizes="(min-width: 900px) 46vw, 100vw"
+            srcset="assets/img/hero-400.webp 400w,
+                    assets/img/hero-600.webp 600w,
+                    assets/img/hero-800.webp 800w,
+                    assets/img/hero-1200.webp 1200w,
+                    assets/img/hero-1600.webp 1600w">
+          <img
+            src="assets/img/hero-800.jpg"
+            sizes="(min-width: 900px) 46vw, 100vw"
+            srcset="assets/img/hero-400.jpg 400w,
+                    assets/img/hero-600.jpg 600w,
+                    assets/img/hero-800.jpg 800w,
+                    assets/img/hero-1200.jpg 1200w,
+                    assets/img/hero-1600.jpg 1600w"
+            width="1600" height="2000"
+            alt="Long dark hair being brushed with the Moev steamer, held at the crown"
+            fetchpriority="high" decoding="async">
+        </picture>
+      </figure>
     </div>
   </section>
 
@@ -298,6 +324,81 @@
           <dd>Once or twice weekly</dd>
         </div>
       </dl>
+
+      <!-- Horizontal snap carousel on phones, three-up grid from 760px. -->
+      <div class="gallery" role="group" aria-label="Product photos">
+        <figure class="shot shot--in-use gallery__item">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/in-use-400.avif 400w,
+                      assets/img/in-use-600.avif 600w,
+                      assets/img/in-use-800.avif 800w,
+                      assets/img/in-use-1200.avif 1200w">
+            <source type="image/webp" sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/in-use-400.webp 400w,
+                      assets/img/in-use-600.webp 600w,
+                      assets/img/in-use-800.webp 800w,
+                      assets/img/in-use-1200.webp 1200w">
+            <img src="assets/img/in-use-600.jpg"
+              sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/in-use-400.jpg 400w,
+                      assets/img/in-use-600.jpg 600w,
+                      assets/img/in-use-800.jpg 800w,
+                      assets/img/in-use-1200.jpg 1200w"
+              width="1600" height="2000" loading="lazy" decoding="async"
+              alt="Close-up of the brush head against the scalp">
+          </picture>
+          <figcaption>Warm steam at the roots</figcaption>
+        </figure>
+
+        <figure class="shot shot--device gallery__item">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/device-400.avif 400w,
+                      assets/img/device-600.avif 600w,
+                      assets/img/device-800.avif 800w,
+                      assets/img/device-1200.avif 1200w">
+            <source type="image/webp" sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/device-400.webp 400w,
+                      assets/img/device-600.webp 600w,
+                      assets/img/device-800.webp 800w,
+                      assets/img/device-1200.webp 1200w">
+            <img src="assets/img/device-600.jpg"
+              sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/device-400.jpg 400w,
+                      assets/img/device-600.jpg 600w,
+                      assets/img/device-800.jpg 800w,
+                      assets/img/device-1200.jpg 1200w"
+              width="1600" height="2000" loading="lazy" decoding="async"
+              alt="The Moev Hair Steamer Pro seen at an angle">
+          </picture>
+          <figcaption>Cordless, 360&deg; rotating head</figcaption>
+        </figure>
+
+        <figure class="shot shot--set gallery__item">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/set-400.avif 400w,
+                      assets/img/set-600.avif 600w,
+                      assets/img/set-800.avif 800w,
+                      assets/img/set-1200.avif 1200w">
+            <source type="image/webp" sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/set-400.webp 400w,
+                      assets/img/set-600.webp 600w,
+                      assets/img/set-800.webp 800w,
+                      assets/img/set-1200.webp 1200w">
+            <img src="assets/img/set-600.jpg"
+              sizes="(min-width: 760px) 30vw, 78vw"
+              srcset="assets/img/set-400.jpg 400w,
+                      assets/img/set-600.jpg 600w,
+                      assets/img/set-800.jpg 800w,
+                      assets/img/set-1200.jpg 1200w"
+              width="1600" height="2000" loading="lazy" decoding="async"
+              alt="The full Rescue Ritual: steamer with the three Growus treatments">
+          </picture>
+          <figcaption>The Rescue Ritual, complete</figcaption>
+        </figure>
+      </div>
 
       <div class="notice">
         <p>
