@@ -19,6 +19,12 @@ directory = "./site"
 binding = "ASSETS"
 not_found_handling = "404-page"
 
+# Serve files at exactly the paths we link to. The default
+# ("auto-trailing-slash") strips .html and 307-redirects, so /legal/terms.html
+# became a redirect to /legal/terms — harmless, but it added a hop to every
+# legal link, to the Stripe success_url, and to every URL in sitemap.xml.
+html_handling = "none"
+
 [vars]
 SITE_URL = "https://seoulsilk.store"
 ALLOWED_ORIGINS = "https://seoulsilk.store,https://www.seoulsilk.store,http://localhost:8080"
