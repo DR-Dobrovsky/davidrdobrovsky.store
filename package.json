@@ -5,7 +5,7 @@
   "type": "module",
   "description": "One-product store: Moev Hair Steamer Pro + Growus bundles",
   "scripts": {
-    "test": "node tests/smoke.mjs && node tests/worker.mjs && node tests/assets.mjs",
+    "test": "node tests/smoke.mjs && node tests/worker.mjs && node tests/assets.mjs && node tests/csp.mjs",
     "test:site": "node tests/smoke.mjs",
     "test:worker": "node tests/worker.mjs",
     "test:assets": "node tests/assets.mjs",
@@ -15,7 +15,8 @@
     "check:live": "node scripts/check-live.mjs",
     "preview": "cd site && python3 -m http.server 8080",
     "deploy": "wrangler deploy",
-    "tail": "wrangler tail --format pretty"
+    "tail": "wrangler tail --format pretty",
+    "test:csp": "node tests/csp.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.3"

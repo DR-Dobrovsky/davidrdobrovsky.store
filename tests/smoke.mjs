@@ -51,7 +51,6 @@ async function loadApp({ preRendered = false, cacheKey = '1' } = {}) {
 
   const els = {};
   for (const id of [
-    'bundles',
     'checkoutError',
     'cookieBar',
     'langBtn',
@@ -61,8 +60,10 @@ async function loadApp({ preRendered = false, cacheKey = '1' } = {}) {
   ]) {
     els[`#${id}`] = makeEl(id);
   }
+  // The grid is selected by class, since the section owns id="bundles".
+  els['.bundles'] = makeEl('bundles');
 
-  if (preRendered) els['#bundles'].innerHTML = '<article class="bundle">baked</article>';
+  if (preRendered) els['.bundles'].innerHTML = '<article class="bundle">baked</article>';
 
   globalThis.document = {
     readyState: 'complete',
@@ -103,7 +104,7 @@ async function loadApp({ preRendered = false, cacheKey = '1' } = {}) {
 /* ------------------------------- scenario: cards not baked in (fallback) -- */
 
 const fallback = await loadApp({ preRendered: false, cacheKey: 'fallback' });
-const html = fallback.els['#bundles'].innerHTML;
+const html = fallback.els['.bundles'].innerHTML;
 const euro = '\u20AC';
 
 check('fallback renders three cards', (html.match(/class="bundle"/g) || []).length === 3);
@@ -143,7 +144,7 @@ if (docClick) {
 const baked = await loadApp({ preRendered: true, cacheKey: 'baked' });
 check(
   'pre-rendered cards are left untouched',
-  baked.els['#bundles'].innerHTML === '<article class="bundle">baked</article>'
+  baked.els['.bundles'].innerHTML === '<article class="bundle">baked</article>'
 );
 check(
   'checkout is still wired when cards were baked in',

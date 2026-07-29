@@ -27,9 +27,13 @@ const money = makeMoney(SHOP.currency);
  * which keeps the page from ever showing an empty bundles section.
  */
 function renderBundles() {
-  const host = $('#bundles');
+  // Selected by class, not by id: the surrounding <section> also carries
+  // id="bundles" as the nav anchor, and querySelector('#bundles') matched the
+  // section first — so a fallback render would have replaced the whole
+  // section, heading and all.
+  const host = $('.bundles');
   if (!host) return;
-  if (host.querySelector('.bundle')) return; // already server-rendered
+  if (host.querySelector('.bundle')) return; // already baked in by npm run bundles
   host.innerHTML = BUNDLES.map((b) => bundleCard(b, money)).join('');
 }
 
