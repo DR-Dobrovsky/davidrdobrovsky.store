@@ -1,0 +1,13 @@
+{
+  "name": "davidrdobrovsky-store",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One-product store: Moev Hair Steamer Pro + Growus bundles",
+  "scripts": {
+    "test": "node tests/smoke.mjs && node tests/worker.mjs",
+    "test:site": "node tests/smoke.mjs",
+    "test:worker": "node tests/worker.mjs",
+    "preview": "cd site && python3 -m http.server 8080"
+  }
+}

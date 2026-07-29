@@ -1,0 +1,19 @@
+name = "seoulsilk-checkout"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Public, non-secret configuration.
+# Secrets are set with `wrangler secret put`, never here:
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+[vars]
+SITE_URL = "https://davidrdobrovsky.store"
+ALLOWED_ORIGINS = "https://davidrdobrovsky.store,https://www.davidrdobrovsky.store,http://localhost:8080"
+# Optional: create a Shipping Rate in Stripe, then paste its ID here.
+# SHIPPING_RATE_ID = "shr_..."
+
+# Serves the Worker on the same domain as the site, so the front-end can call
+# a relative /api/checkout with no CORS preflight at all.
+[[routes]]
+pattern = "davidrdobrovsky.store/api/*"
+zone_name = "davidrdobrovsky.store"
