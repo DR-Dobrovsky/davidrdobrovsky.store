@@ -1,0 +1,6 @@
+# Copy to .dev.vars for local development. .dev.vars is git-ignored.
+# Use TEST keys locally — they start with sk_test_
+STRIPE_SECRET_KEY=sk_test_replace_me
+STRIPE_WEBHOOK_SECRET=whsec_replace_me
+SITE_URL=http://localhost:8080
+ALLOWED_ORIGINS=http://localhost:8080

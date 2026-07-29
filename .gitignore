@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# secrets — NEVER commit Stripe keys
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# cloudflare / wrangler
+.wrangler/
+worker/.wrangler/
+
+# build output
+dist/
+.output/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
