@@ -5,13 +5,15 @@ steamer) plus **Growus Damage Therapy** bundles. Static HTML with Stripe
 Checkout — no Shopify, no monthly fee, no build step.
 
 ```
-site/                 static site — deploy this folder
+wrangler.toml         root deployment: site + API in one Worker
+site/                 the website, bound as static assets
   index.html          the whole sales page
   thanks.html         post-payment page
   assets/css|js|img
   legal/              terms, privacy, shipping & returns, legal notice
-  _headers            security + caching (Cloudflare Pages)
-worker/               Cloudflare Worker: creates Stripe Checkout Sessions
+  _headers            security + caching headers
+worker/src/index.js   Stripe Checkout Sessions + webhook
+tests/                38 checks, no install and no browser needed
 ```
 
 Running costs: **€0/month** hosting, Stripe ~1.5% + €0.25 per card payment,
@@ -19,18 +21,26 @@ plus 0.5% if you enable Stripe Tax.
 
 ---
 
-## 1. Rename the brand
+## 1. Still to fill in
 
-`Seoulsilk` is a placeholder. Find and replace across the repo, then change
-`brand` in `site/assets/js/config.js`:
+The brand is **Seoulsilk** and the domain is **seoulsilk.store** — both are
+real, no renaming needed.
+
+What is still placeholder text:
+
+- `[COMPANY_NAME]`, `[KBO/BCE]`, `[BE0123.456.789]` and the address in
+  `site/legal/` — required by Belgian and EU e-commerce law before selling
+- `hello@seoulsilk.store` — set up the mailbox or change the address
+- product photography in `site/assets/img/` (the page shows labelled
+  placeholders with the required aspect ratios until then)
+- the reviews section, which is clearly marked and must be replaced with
+  genuine reviews or removed
+
+Find everything outstanding:
 
 ```bash
-grep -rl 'Seoulsilk' . --exclude-dir=.git | xargs sed -i 's/Seoulsilk/YourBrand/g'
-grep -rl 'seoulsilk.store' . --exclude-dir=.git | xargs sed -i 's/seoulsilk.store/yourdomain.com/g'
+grep -rn '\[COMPANY_NAME\]\|\[KBO\|REPLACE_ME' . --exclude-dir=.git
 ```
-
-Then search for `[COMPANY_NAME]`, `hello@seoulsilk.store` and every other
-`[bracketed]` placeholder in `site/legal/` and fill them in.
 
 ## 2. Prices and bundles
 
@@ -62,36 +72,45 @@ account and shows real prices.
 5. Add your terms URL in Stripe → Settings → Checkout, so customers accept
    them during payment.
 
-## 4. Deploy the Worker
+## 4. Deploy — one Worker serves everything
+
+The root `wrangler.toml` binds `site/` as static assets to the same Worker that
+handles the API. `/api/*` goes to the script, everything else is served as a
+file. One deployment, one domain, and no CORS boundary in between.
 
 ```bash
-cd worker
-npm install
-cp .dev.vars.example .dev.vars     # put TEST keys in here
-npx wrangler dev                   # http://127.0.0.1:8787
+npm install -D wrangler
 
-# production
-npx wrangler secret put STRIPE_SECRET_KEY      # sk_live_...
+# secrets — never in git
+npx wrangler secret put STRIPE_SECRET_KEY      # sk_test_... while testing
 npx wrangler secret put STRIPE_WEBHOOK_SECRET  # whsec_...
+
 npx wrangler deploy
+npx wrangler tail --format pretty              # watch orders arrive
 ```
 
-Edit `wrangler.toml`: set `SITE_URL`, `ALLOWED_ORIGINS` and the route pattern
-to your domain. Routing the Worker on your own domain (`/api/*`) means the
-front-end calls a relative URL and there is no CORS preflight at all.
+Local development, site and API together:
 
-Then in Stripe → Developers → Webhooks, add
-`https://yourdomain.com/api/webhook` for the event
-**`checkout.session.completed`**.
+```bash
+cp worker/.dev.vars.example .dev.vars
+npx wrangler dev                               # http://127.0.0.1:8787
+```
 
-## 5. Deploy the site
+## 5. Attach the domain
 
-Cloudflare Pages → Connect to Git → pick this repo:
+Dashboard → **Workers & Pages → seoulsilk → Domains → Custom Domains**, then add
+**both** `seoulsilk.store` and `www.seoulsilk.store`.
 
-- **Build command:** *(leave empty)*
-- **Output directory:** `site`
+Two traps worth knowing:
 
-Add your domain in Pages → Custom domains, and point the DNS at Cloudflare.
+- A wildcard route such as `*.seoulsilk.store/*` does **not** match the apex
+  domain. Add Custom Domains rather than relying on a route.
+- When a zone is imported from another registrar, Cloudflare copies the old
+  parking `A` record. Delete it in **DNS**, or the domain keeps resolving to the
+  previous host. The Custom Domain creates the right record itself.
+
+Then in Stripe → Developers → Webhooks add
+`https://seoulsilk.store/api/webhook` for **`checkout.session.completed`**.
 
 ## 6. Fulfilment (manual, by design)
 
@@ -99,7 +118,7 @@ There is no supplier API, so orders are placed by hand. That is fine at test
 volume and it means you see every order.
 
 ```bash
-cd worker && npx wrangler tail --format pretty
+npx wrangler tail --format pretty
 ```
 
 Every paid order prints a single `ORDER` line with the bundle, customer name,

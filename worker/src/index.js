@@ -256,6 +256,14 @@ export default {
       return json({ ok: true, stripe: Boolean(env.STRIPE_SECRET_KEY) }, 200, cors);
     }
 
+    // Anything that is not an API call is a request for the website. When the
+    // static assets binding is present (see wrangler.toml at the repo root)
+    // one Worker serves both the shop and its API from the same origin, which
+    // is why the front-end can POST to a relative /api/checkout with no CORS.
+    if (env.ASSETS) {
+      return env.ASSETS.fetch(request);
+    }
+
     return json({ error: 'Not found' }, 404, cors);
   },
 };
