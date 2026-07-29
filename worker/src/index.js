@@ -118,7 +118,7 @@ async function handleCheckout(request, env, cors) {
         adjustable_quantity: { enabled: true, minimum: 1, maximum: 5 },
       },
     ],
-    success_url: `${site}/thanks.html?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${site}/thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${site}/#bundles`,
     // Stripe Tax works out the correct VAT rate for the customer's country,
     // which is what keeps OSS reporting straightforward later on.
