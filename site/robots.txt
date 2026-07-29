@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /thanks.html
 
-Sitemap: https://davidrdobrovsky.store/sitemap.xml
+Sitemap: https://seoulsilk.store/sitemap.xml
