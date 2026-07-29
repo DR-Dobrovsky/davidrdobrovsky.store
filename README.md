@@ -80,8 +80,18 @@ once real photography is in place.
 
 ## 3. Prices and bundles
 
-Everything lives in **`site/assets/js/config.js`** — the only file with pricing
-logic. Current placeholders:
+Prices live in **`site/assets/js/config.js`** and nowhere else. After changing
+them, bake the cards back into the HTML:
+
+```bash
+npm run bundles
+```
+
+That regenerates the markup between the `<!-- bundles:start -->` markers in
+`index.html`, so **prices are in the served HTML** rather than appearing only
+after JavaScript runs. It matters on a shop page: if a script is blocked or
+slow on mobile data the visitor would otherwise see nothing to buy, and
+crawlers and link previews would see no prices at all. Commit the result.
 
 | Bundle | Sells for | Wholesale cost | Status |
 |---|---|---|---|
@@ -91,8 +101,7 @@ logic. Current placeholders:
 
 Open the site and check the browser console — a table prints your margin and
 your **break-even CPA** (the most you can pay per sale in ads before losing
-money). Update `costPrice` as soon as Korean Skincare Supply approves the
-account and shows real prices.
+money). Update `costPrice` once Korean Skincare Supply approves the account.
 
 ## 4. Stripe
 
@@ -122,8 +131,15 @@ npx wrangler secret put STRIPE_SECRET_KEY      # sk_test_... while testing
 npx wrangler secret put STRIPE_WEBHOOK_SECRET  # whsec_...
 
 npx wrangler deploy
+npm run check:live                             # verify the deploy
 npx wrangler tail --format pretty              # watch orders arrive
 ```
+
+`npm run check:live` hits the deployed site and checks status and content-type
+for every page, that unknown paths return a real 404 page, and that the
+homepage contains the shop rather than an error body. Run it after every
+deploy: a config change once took the homepage down while all local tests
+still passed, because the fault was in Cloudflare's asset routing.
 
 Local development, site and API together:
 
@@ -191,8 +207,11 @@ law, which is a far heavier regime than cosmetics.
 ## Local preview
 
 ```bash
-cd site && python3 -m http.server 8080
+npx wrangler dev        # accurate: extensionless URLs, /api/*, 404 page
+npm run preview         # quick: plain static server on :8080
 ```
 
-`config.js` is an ES module, so open it over `http://localhost:8080` —
-`file://` will not work.
+Prefer `wrangler dev`. The plain server does not resolve `/legal/terms` to
+`terms.html`, so links will 404 there even though production is fine.
+
+`config.js` is an ES module, so use a server — `file://` will not work.
