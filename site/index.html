@@ -192,7 +192,7 @@
           <!-- carousel:hero -->
         <figure class="carousel__slide shot--hero" role="group"
                 aria-roledescription="slide"
-                aria-label="Photo 1 of 1">
+                aria-label="Photo 1 of 2">
         <picture>
           <source
             type="image/avif"
@@ -212,6 +212,30 @@
             width="600" height="800"
             alt="Long dark hair being brushed with the Moev steamer, held at the crown"
             fetchpriority="high" decoding="async">
+        </picture>
+        </figure>
+        <figure class="carousel__slide shot--hero-1" role="group"
+                aria-roledescription="slide"
+                aria-label="Photo 2 of 2">
+        <picture>
+          <source
+            type="image/avif"
+            sizes="(min-width: 900px) 46vw, 100vw"
+            srcset="/assets/img/hero-1-400.avif 400w,
+                    /assets/img/hero-1-600.avif 600w">
+          <source
+            type="image/webp"
+            sizes="(min-width: 900px) 46vw, 100vw"
+            srcset="/assets/img/hero-1-400.webp 400w,
+                    /assets/img/hero-1-600.webp 600w">
+          <img
+            src="/assets/img/hero-1-600.jpg"
+            sizes="(min-width: 900px) 46vw, 100vw"
+            srcset="/assets/img/hero-1-400.jpg 400w,
+                    /assets/img/hero-1-600.jpg 600w"
+            width="600" height="800"
+            alt="Moev Hair Steamer Pro, product photo 2"
+            loading="lazy" decoding="async">
         </picture>
         </figure>
           <!-- /carousel:hero -->

@@ -8,6 +8,15 @@
     "height": 800,
     "sourceWidth": 600
   },
+  "hero-1": {
+    "widths": [
+      400,
+      600
+    ],
+    "width": 600,
+    "height": 800,
+    "sourceWidth": 632
+  },
   "in-use": {
     "widths": [
       400,

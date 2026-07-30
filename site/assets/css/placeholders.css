@@ -8,6 +8,12 @@
   background-position: center;
 }
 
+.shot--hero-1 {
+  background-image: url('data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAADQAwCdASoUABsAPxFyr1AsJqQisAgBgCIJZgCsABueC2rnTh5rqeAA/R+Kdi8+urlrm+0RY+GuTmH285s7y2JgJfK1Zt83FZ2O5vG281+x5McBGdJdmAAA');
+  background-size: cover;
+  background-position: center;
+}
+
 .shot--in-use {
   background-image: url('data:image/webp;base64,UklGRkYAAABXRUJQVlA4IDoAAAAQAwCdASoUABkAPxF6r1KsJ6QiqA1RgCIJZwCw7Bay0eAA/u6UhC5RyEsDgEoiCFLPKIus+ZMrQAAA');
   background-size: cover;
