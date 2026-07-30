@@ -52,6 +52,25 @@ async function build() {
     process.exit(1);
   }
 
+  // Two files for the same slot (hero.jpg and hero.png) would both be
+  // processed, and whichever ran last would win non-deterministically while
+  // the other's variants lingered. Better to stop and say so.
+  const bySlot = new Map();
+  for (const file of sources) {
+    const slot = parse(file).name;
+    if (!bySlot.has(slot)) bySlot.set(slot, []);
+    bySlot.get(slot).push(file);
+  }
+  const clashes = [...bySlot].filter(([, files]) => files.length > 1);
+  if (clashes.length) {
+    console.error('\nTwo source files map to the same slot:\n');
+    for (const [slot, files] of clashes) {
+      console.error(`  ${slot}:  ${files.join('  ')}`);
+    }
+    console.error('\nKeep one file per slot and delete the other.\n');
+    process.exit(1);
+  }
+
   await mkdir(OUT_DIR, { recursive: true });
 
   const placeholders = {};

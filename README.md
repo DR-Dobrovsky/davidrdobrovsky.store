@@ -44,39 +44,56 @@ grep -rn '\[COMPANY_NAME\]\|\[KBO\|REPLACE_ME' . --exclude-dir=.git
 
 ## 2. Photos
 
-The page currently ships **neutral gradient stand-ins** so no slot is empty.
-They are abstract on purpose — no invented product, no invented person.
+**Important: the files in `site/assets/img/src/` are sources, not the images the
+site serves.** The browser loads generated variants — `hero-400.avif`,
+`hero-800.jpg` and thirteen more per slot. Replacing a source on its own changes
+nothing until those variants are rebuilt.
 
-Replacing them is two steps:
+### From the browser, no tools needed
+
+1. Go to `site/assets/img/src/` on GitHub
+2. **Add file → Upload files**, and upload your photo named exactly
+   `hero.jpg`, `in-use.jpg`, `device.jpg` or `set.jpg`
+3. Commit
+
+The **Build images** workflow then regenerates every size and format, the
+`og.jpg` link-preview card and the blurred placeholders, and commits them back.
+Watch it under the repository's **Actions** tab; it takes about a minute. The
+deploy picks the new files up on its own.
+
+You can also trigger it by hand: **Actions → Build images → Run workflow**.
+
+### Locally, if you have Node
 
 ```bash
-# 1. drop real photos into site/assets/img/src/ using these exact names:
-#    hero.jpg  in-use.jpg  device.jpg  set.jpg      (4:5, ideally 1600px wide)
-
-npm install          # once, pulls in sharp
-npm run images       # 2. generate every size and format
+npm install
+npm run images
+git commit -am "New photos"
 ```
 
-That produces, per photo, five widths in AVIF, WebP and JPEG, plus the
-`og.jpg` link-preview card and blurred placeholders in
-`assets/css/placeholders.css`. Commit the results — Cloudflare deploys the
-files as they are, there is no build step on their side.
+### Shot list
 
-The shot list and advice on sourcing photography is in
+| File | Ratio | Min width | What it shows |
+|---|---|---|---|
+| `hero.jpg` | 4:5 | 1600 px | A woman using the device on long hair. The most important image on the page. |
+| `in-use.jpg` | 4:5 | 1200 px | Close-up of the brush head against the scalp. |
+| `device.jpg` | 4:5 | 1200 px | The device alone, angled, soft shadow. |
+| `set.jpg` | 4:5 | 1200 px | The full Rescue Ritual, device plus the three bottles. |
+
+Keep one file per slot — `hero.jpg` **and** `hero.png` together is rejected,
+because both would build into the same variants. Keep the 4:5 ratio: the layout
+reserves that space, so anything else letterboxes or crops.
+
+Sourcing advice, including what you may and may not legally use, is in
 [`site/assets/img/src/README.md`](site/assets/img/src/README.md).
 
 ### How the page uses them
 
 - `<picture>` with AVIF → WebP → JPEG, so each browser gets the smallest file
-  it understands
 - `srcset` + `sizes`, so a phone downloads a 400px file instead of a 1600px one
 - `width`/`height` and a reserved 4:5 box, so nothing shifts while loading
-- hero is preloaded and `fetchpriority="high"`; the gallery is `loading="lazy"`
-- on phones the hero frame becomes 1:1 and the gallery turns into a swipeable
-  snap carousel, so the price stays close to the top of the screen
-
-`scripts/make-temp-photos.mjs` regenerates the stand-ins and can be deleted
-once real photography is in place.
+- hero is preloaded and `fetchpriority="high"`; the gallery is lazy-loaded
+- on phones the gallery becomes a swipeable snap carousel
 
 ## 3. Prices and bundles
 
