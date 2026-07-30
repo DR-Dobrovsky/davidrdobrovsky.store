@@ -15,10 +15,12 @@ const check = (label, passed) => results.push([label, passed]);
 
 /**
  * @param {object} opts
- * @param {boolean} opts.preRendered whether #bundles already holds cards,
+ * @param {boolean} opts.preRendered whether the grid already holds cards,
  *   i.e. whether `npm run bundles` has been run — the production case.
+ * @param {number}  opts.clips how many looping clips are on the page.
+ * @param {boolean} opts.reduceMotion whether the visitor asked for less motion.
  */
-async function loadApp({ preRendered = false, cacheKey = '1' } = {}) {
+async function loadApp({ preRendered = false, cacheKey = '1', clips = 0, reduceMotion = false } = {}) {
   const listeners = {};
   const store = {};
 
@@ -65,10 +67,22 @@ async function loadApp({ preRendered = false, cacheKey = '1' } = {}) {
 
   if (preRendered) els['.bundles'].innerHTML = '<article class="bundle">baked</article>';
 
+  /** Clips found in the document, if the scenario asks for any. */
+  const clipVideos = clips
+    ? Array.from({ length: clips }, () => ({
+        removeAttribute() {},
+        play: () => Promise.resolve(),
+        pause() {},
+        preload: 'none',
+        controls: false,
+      }))
+    : [];
+
   globalThis.document = {
     readyState: 'complete',
     documentElement: { lang: 'en' },
     querySelector: (sel) => els[sel] ?? null,
+    querySelectorAll: (sel) => (sel === '.clip__video' ? clipVideos : []),
     addEventListener(type, fn) {
       (listeners[`doc:${type}`] ??= []).push(fn);
     },
@@ -79,13 +93,20 @@ async function loadApp({ preRendered = false, cacheKey = '1' } = {}) {
       store[k] = v;
     },
   };
+  const observed = [];
   globalThis.window = {
     location: {
       assign(url) {
         globalThis.__redirect = url;
       },
     },
+    matchMedia: (q) => ({ matches: reduceMotion && q.includes('reduced-motion') }),
+    IntersectionObserver: class {
+      constructor(cb) { this.cb = cb; }
+      observe(el) { observed.push(el); }
+    },
   };
+  globalThis.IntersectionObserver = globalThis.window.IntersectionObserver;
   globalThis.fetch = async () => {
     throw new Error('network disabled in test');
   };
@@ -98,7 +119,7 @@ async function loadApp({ preRendered = false, cacheKey = '1' } = {}) {
   await import(`../site/assets/js/main.js?v=${cacheKey}`);
 
   console.error = realError;
-  return { els, listeners, consoleErrors };
+  return { els, listeners, consoleErrors, clipVideos, observed };
 }
 
 /* ------------------------------- scenario: cards not baked in (fallback) -- */
@@ -149,6 +170,31 @@ check(
 check(
   'checkout is still wired when cards were baked in',
   (baked.listeners['doc:click'] ?? []).length > 0
+);
+
+
+/* ------------------------------------------------- scenario: looping clips -- */
+
+const withClips = await loadApp({ preRendered: true, cacheKey: 'clips', clips: 2 });
+check(
+  'clips are observed so they only load once on screen',
+  withClips.observed.length === 2
+);
+check(
+  'clips are not forced to preload eagerly',
+  withClips.clipVideos.every((v) => v.preload === 'none')
+);
+
+const reduced = await loadApp({
+  preRendered: true, cacheKey: 'reduced', clips: 2, reduceMotion: true,
+});
+check(
+  'reduced motion: nothing is observed for autoplay',
+  reduced.observed.length === 0
+);
+check(
+  'reduced motion: controls are offered instead',
+  reduced.clipVideos.every((v) => v.controls === true)
 );
 
 /* ----------------------------------------------------------------- report */

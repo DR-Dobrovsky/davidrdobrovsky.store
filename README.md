@@ -102,13 +102,57 @@ Sourcing advice, including what you may and may not legally use, is in
 
 ### How the page uses them
 
-- `<picture>` with AVIF → WebP → JPEG, so each browser gets the smallest file
+- `<picture>` with **AVIF → WebP → JPEG**, so each browser gets the smallest
+  file it understands. Measured on the same hero: AVIF 19.7 kB, WebP 24.4 kB,
+  JPEG 33.6 kB — JPEG is only a fallback for browsers too old for the others
 - `srcset` + `sizes`, so a phone downloads a 400px file instead of a 1600px one
 - `width`/`height` and a reserved 4:5 box, so nothing shifts while loading
 - hero is preloaded and `fetchpriority="high"`; the gallery is lazy-loaded
 - on phones the gallery becomes a swipeable snap carousel
 
-## 3. Prices and bundles
+## 3. Looping clips
+
+Short muted videos of the product being used — what most sites call GIFs, done
+properly. Drop one clip per slot into `site/assets/video/src/` and the build
+produces WebM and MP4 at two sizes plus a poster frame:
+
+```
+ritual.mp4  ->  ritual-480.webm  ritual-480.mp4    phones
+                ritual-720.webm  ritual-720.mp4    everything else
+                ritual-poster.jpg
+```
+
+Straight off a phone is fine; the build rescales, strips audio and re-encodes.
+Slots are `ritual`, `scalp` and `cartridge` — any can be missing, and if none
+exist the section stays hidden instead of leaving a gap.
+
+Uploading to that folder on GitHub triggers the **Build media** workflow, same
+as photos. Locally: `npm run clips`.
+
+### Why not GIF
+
+Measured on a real four-second clip from this project:
+
+| Format | Size | Frame rate |
+|---|---|---|
+| GIF, 480px | 1997 kB | 12 fps |
+| WebM, 480px | **9 kB** | 25 fps |
+
+Over two hundred times larger, and worse-looking, because GIF is capped at 256
+colours. Clips here are muted looping `<video>`, which is what every "GIF" on a
+modern product page actually is.
+
+### How they behave
+
+- `preload="none"`, then loaded and played only once scrolled into view, so a
+  phone spends nothing on clips nobody reached
+- paused again on the way out
+- `prefers-reduced-motion` turns autoplay off and shows controls instead
+- muted and `playsinline`, so iOS does not hijack the screen
+
+Details and filming notes: [`site/assets/video/src/README.md`](site/assets/video/src/README.md)
+
+## 4. Prices and bundles
 
 Prices live in **`site/assets/js/config.js`** and nowhere else. After changing
 them, bake the cards back into the HTML:
@@ -133,7 +177,7 @@ Open the site and check the browser console — a table prints your margin and
 your **break-even CPA** (the most you can pay per sale in ads before losing
 money). Update `costPrice` once Korean Skincare Supply approves the account.
 
-## 4. Stripe
+## 5. Stripe
 
 1. Create a Stripe account (Belgium) and **activate Bancontact** — it is the
    dominant method locally.
@@ -147,7 +191,7 @@ money). Update `costPrice` once Korean Skincare Supply approves the account.
 5. Add your terms URL in Stripe → Settings → Checkout, so customers accept
    them during payment.
 
-## 5. Deploy — one Worker serves everything
+## 6. Deploy — one Worker serves everything
 
 The root `wrangler.toml` binds `site/` as static assets to the same Worker that
 handles the API. `/api/*` goes to the script, everything else is served as a
@@ -178,7 +222,7 @@ cp worker/.dev.vars.example .dev.vars
 npx wrangler dev                               # http://127.0.0.1:8787
 ```
 
-## 6. Attach the domain
+## 7. Attach the domain
 
 Dashboard → **Workers & Pages → seoulsilk → Domains → Custom Domains**, then add
 **both** `seoulsilk.store` and `www.seoulsilk.store`.
@@ -194,7 +238,7 @@ Two traps worth knowing:
 Then in Stripe → Developers → Webhooks add
 `https://seoulsilk.store/api/webhook` for **`checkout.session.completed`**.
 
-## 7. Fulfilment (manual, by design)
+## 8. Fulfilment (manual, by design)
 
 There is no supplier API, so orders are placed by hand. That is fine at test
 volume and it means you see every order.

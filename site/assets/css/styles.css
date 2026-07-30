@@ -348,6 +348,68 @@ a:hover { color: var(--accent-hover); }
   .gallery__item { scroll-snap-align: center; }
 }
 
+/* ---------------------------------------------------------------- clips ----
+   Short muted loops rather than GIFs: a three-second GIF at this size is
+   several megabytes and capped at 256 colours, where VP9 is a few hundred
+   kilobytes and actually looks like video.                                  */
+
+.clips-section[hidden] { display: none; }
+
+.clips {
+  display: grid;
+  gap: clamp(0.9rem, 2vw, 1.5rem);
+  margin-block: clamp(2rem, 4vw, 3rem);
+}
+
+@media (min-width: 760px) {
+  .clips { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+}
+
+/* Same swipeable treatment as the photo gallery on phones. */
+@media (max-width: 759px) {
+  .clips {
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    padding-bottom: 0.5rem;
+    overscroll-behavior-x: contain;
+  }
+  .clip { scroll-snap-align: center; }
+}
+
+.clip {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--cream-deep);
+  box-shadow: var(--shadow);
+}
+
+.clip__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: var(--cream-deep);
+}
+
+.clip figcaption {
+  padding: 0.75rem 1rem 0.9rem;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+  background: var(--white);
+  text-align: center;
+}
+
+/* Anyone who has asked the system to reduce motion gets a still frame with
+   controls instead of something moving on its own. */
+@media (prefers-reduced-motion: reduce) {
+  .clip__video { animation: none; }
+}
+
 .gallery__item figcaption {
   padding: 0.75rem 1rem 0.9rem;
   font-size: var(--step--1);
