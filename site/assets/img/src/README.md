@@ -1,13 +1,21 @@
 # Source photos go here
 
-Drop **one high-resolution photo per slot** in this folder, then run:
+Drop **one high-resolution photo per slot** in this folder.
+
+**These files are never served.** The site loads generated variants such as
+`hero-800.avif` from `site/assets/img/`. Uploading a new source here does
+nothing on its own — the variants have to be rebuilt.
+
+Pushing a change to this folder triggers the **Build images** GitHub Action,
+which rebuilds and commits them automatically. To do it locally instead:
 
 ```bash
+npm install
 npm run images
 ```
 
-That generates every size and format the page needs into `site/assets/img/`,
-plus blurred placeholders. Source files stay here and are not served.
+One file per slot only: `hero.jpg` and `hero.png` together will be rejected,
+since both map to the same output name.
 
 ## Shot list
 

@@ -1,0 +1,72 @@
+name: Build images
+
+# Regenerates the responsive image variants whenever a source photo changes.
+#
+# The point of this workflow: you can replace a photo entirely from the GitHub
+# web interface, with no local Node install. Upload a file to
+# site/assets/img/src/ and every size, format, the og.jpg card and the blurred
+# placeholders are rebuilt and committed for you.
+#
+# No loop risk: the trigger watches only src/, and the commit touches the
+# generated files outside it.
+
+on:
+  push:
+    paths:
+      - 'site/assets/img/src/**'
+      - 'scripts/build-images.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-images-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate image variants
+        run: npm run images
+
+      - name: Commit the generated files
+        run: |
+          if git diff --quiet -- site/assets/img site/assets/css/placeholders.css; then
+            echo "Nothing changed — the variants were already up to date."
+            exit 0
+          fi
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add site/assets/img site/assets/css/placeholders.css
+          git commit -m "Rebuild image variants [skip ci]"
+          git push
+
+      - name: Summary
+        run: |
+          {
+            echo "### Image variants rebuilt"
+            echo ""
+            echo "| File | Size |"
+            echo "| --- | --- |"
+            ls -la site/assets/img/*.avif 2>/dev/null | head -5 \
+              | awk '{printf "| %s | %.0f kB |\n", $9, $5/1024}'
+            echo ""
+            echo "Deploy picks this up automatically."
+          } >> "$GITHUB_STEP_SUMMARY"
