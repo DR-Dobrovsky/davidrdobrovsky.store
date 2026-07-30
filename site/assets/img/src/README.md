@@ -25,6 +25,7 @@ since both map to the same output name.
 | `in-use.jpg` | 4:5 | 1200 px | Close-up of the brush head against the scalp, steam visible. |
 | `device.jpg` | 4:5 | 1200 px | The device alone, floating or angled, soft shadow, warm neutral background. |
 | `set.jpg` | 4:5 | 1200 px | The full Rescue Ritual laid out: device plus the three Growus bottles. |
+| `band.jpg` | landscape | 2000 px | *Optional.* The full-bleed panel under the hero. Wide and calm — hair, steam, a hand. The headline sits over the left third, so leave that side quiet. |
 
 Keep the ratio consistent at 4:5. The layout reserves that space, so a
 different ratio will letterbox or crop.

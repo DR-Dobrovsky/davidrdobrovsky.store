@@ -45,7 +45,17 @@ check(
 for (const slot of SLOTS) {
   const info = manifest[slot.name];
   if (!info) {
-    check(`manifest has an entry for "${slot.name}"`, false);
+    if (!slot.optional) {
+      check(`manifest has an entry for "${slot.name}"`, false);
+      continue;
+    }
+    // An optional slot with no source is a valid state — the page has a
+    // CSS-only fallback for it. What must not happen is the markup keeping a
+    // reference to variants that were never built.
+    check(
+      `optional slot "${slot.name}" has no source, and the page references none`,
+      !new RegExp(`/assets/img/${slot.name}-\\d+\\.`).test(html)
+    );
     continue;
   }
 

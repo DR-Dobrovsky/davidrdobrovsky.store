@@ -53,7 +53,7 @@ nothing until those variants are rebuilt.
 
 1. Go to `site/assets/img/src/` on GitHub
 2. **Add file → Upload files**, and upload your photo named exactly
-   `hero.jpg`, `in-use.jpg`, `device.jpg` or `set.jpg`
+   `hero.jpg`, `band.jpg`, `in-use.jpg`, `device.jpg` or `set.jpg`
 3. Commit
 
 The **Build images** workflow then regenerates every size and format, the
@@ -83,10 +83,17 @@ git commit -am "New photos"
 | `in-use.jpg` | 4:5 | 1200 px | Close-up of the brush head against the scalp. |
 | `device.jpg` | 4:5 | 1200 px | The device alone, angled, soft shadow. |
 | `set.jpg` | 4:5 | 1200 px | The full Rescue Ritual, device plus the three bottles. |
+| `band.jpg` | landscape, wide | 2000 px | *Optional.* The full-bleed panel under the hero. Needs quiet space on the left for the headline. |
+
+`band.jpg` is the one slot the page does not need. Without it the panel renders
+as a dark gradient with the same headline over it, which looks deliberate; add
+the photo and it slides in behind the text. Everything else must exist.
 
 Keep one file per slot — `hero.jpg` **and** `hero.png` together is rejected,
-because both would build into the same variants. Keep the 4:5 ratio: the layout
-reserves that space, so anything else letterboxes or crops.
+because both would build into the same variants. Keep the 4:5 ratio for the four
+portrait slots: the layout reserves that space, so anything else letterboxes or
+crops. `band.jpg` is the exception — it is cropped to fill a wide strip, so give
+it a landscape frame.
 
 **Resolution matters more than it looks.** Only widths up to the source width
 are generated, so a 600px photo produces just the 400px and 600px variants and
