@@ -201,6 +201,56 @@ function logMargins() {
   console.groupEnd();
 }
 
+/* --------------------------------------------------------------- clips --- */
+
+/**
+ * Looping clips are marked preload="none" so they cost nothing until they are
+ * on screen. This starts them when they scroll into view and pauses them when
+ * they leave, which on a phone is the difference between a few hundred
+ * kilobytes and several megabytes of video nobody watched.
+ *
+ * If the visitor has asked for reduced motion, nothing plays by itself and the
+ * native controls appear instead.
+ */
+function wireClips() {
+  const clips = document.querySelectorAll('.clip__video');
+  if (clips.length === 0) return;
+
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduceMotion) {
+    for (const video of clips) {
+      video.removeAttribute('autoplay');
+      video.controls = true;
+      video.preload = 'metadata';
+    }
+    return;
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    for (const video of clips) video.preload = 'auto';
+    return;
+  }
+
+  const seen = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const video = entry.target;
+        if (entry.isIntersecting) {
+          if (video.preload !== 'auto') video.preload = 'auto';
+          // play() rejects if the browser declines autoplay; that is fine.
+          video.play?.().catch(() => {});
+        } else {
+          video.pause?.();
+        }
+      }
+    },
+    { rootMargin: '200px 0px', threshold: 0.25 }
+  );
+
+  for (const video of clips) seen.observe(video);
+}
+
 /* ------------------------------------------------------------------ init */
 
 function init() {
@@ -208,6 +258,7 @@ function init() {
   wireCheckout();
   wireCookieBar();
   wireLanguage();
+  wireClips();
 
   const year = $('#year');
   if (year) year.textContent = new Date().getFullYear();

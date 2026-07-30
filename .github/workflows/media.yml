@@ -1,4 +1,4 @@
-name: Build images
+name: Build media
 
 # Regenerates the responsive image variants whenever a source photo changes.
 #
@@ -14,18 +14,21 @@ on:
   push:
     paths:
       - 'site/assets/img/src/**'
+      - 'site/assets/video/src/**'
       - 'scripts/build-images.mjs'
+      - 'scripts/build-picture.mjs'
+      - 'scripts/build-clips.mjs'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: build-images-${{ github.ref }}
+  group: build-media-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  images:
+  media:
     runs-on: ubuntu-latest
 
     steps:
@@ -44,15 +47,20 @@ jobs:
       - name: Generate image variants
         run: npm run images
 
+      - name: Generate looping clips
+        run: npm run clips
+
       - name: Check the result is consistent
-        run: npm run test:images
+        run: |
+          npm run test:images
+          npm run test:clips
 
       - name: Commit the generated files
         run: |
           # index.html is included because the <picture> markup is generated
           # from the widths that were actually built — if it were left out, the
           # page could reference variants that no longer exist.
-          PATHS="site/assets/img site/assets/css/placeholders.css site/index.html"
+          PATHS="site/assets/img site/assets/video site/assets/css/placeholders.css site/index.html"
 
           if git diff --quiet -- $PATHS; then
             echo "Nothing changed — the variants were already up to date."
@@ -69,7 +77,7 @@ jobs:
       - name: Summary
         run: |
           {
-            echo "### Image variants rebuilt"
+            echo "### Media rebuilt"
             echo ""
             echo "| File | Size |"
             echo "| --- | --- |"
