@@ -63,11 +63,15 @@ deploy picks the new files up on its own.
 
 You can also trigger it by hand: **Actions → Build images → Run workflow**.
 
+The workflow also regenerates `index.html`, because the `<picture>` markup is
+built from the widths that were actually produced — never from a fixed list.
+That is what stops the page asking for a variant that does not exist.
+
 ### Locally, if you have Node
 
 ```bash
 npm install
-npm run images
+npm run images        # variants + manifest + placeholders, then the markup
 git commit -am "New photos"
 ```
 
@@ -83,6 +87,15 @@ git commit -am "New photos"
 Keep one file per slot — `hero.jpg` **and** `hero.png` together is rejected,
 because both would build into the same variants. Keep the 4:5 ratio: the layout
 reserves that space, so anything else letterboxes or crops.
+
+**Resolution matters more than it looks.** Only widths up to the source width
+are generated, so a 600px photo produces just the 400px and 600px variants and
+the page will serve those to a desktop too. The build says so plainly:
+
+```
+! "hero" is 600px wide; 1600px recommended — it will look soft on
+  large or high-density screens
+```
 
 Sourcing advice, including what you may and may not legally use, is in
 [`site/assets/img/src/README.md`](site/assets/img/src/README.md).
