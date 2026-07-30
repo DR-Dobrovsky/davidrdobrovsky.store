@@ -50,8 +50,8 @@
       "name": "Moev Hair Steamer Pro",
       "brand": { "@type": "Brand", "name": "Moev" },
       "category": "Hair care device",
-      "description": "Cordless Korean hair steamer and scalp massager with two steam modes, a 360-degree rotating head and replaceable argan and caffeine oil cartridges.",
-      "countryOfOrigin": "KR",
+      "description": "Cordless hair steamer and scalp massager from the Korean brand Moev, with two steam modes, a 360-degree rotating head and replaceable argan and caffeine oil cartridges.",
+      "countryOfOrigin": "CN",
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "EUR",
@@ -108,7 +108,7 @@
     <a class="logo" href="/">Seoulsilk</a>
 
     <nav class="nav" aria-label="Main">
-      <a href="#problem">Why steam</a>
+      <a href="#why">Why steam</a>
       <a href="#ritual">The ritual</a>
       <a href="#bundles">Bundles</a>
       <a href="#faq">FAQ</a>
@@ -146,7 +146,7 @@
 
         <div class="hero__actions">
           <a class="btn btn--lg" href="#bundles">Choose your ritual</a>
-          <a class="btn btn--ghost btn--lg" href="#problem">How it works</a>
+          <a class="btn btn--ghost btn--lg" href="#why">How it works</a>
         </div>
 
         <p class="hero__note">From &euro;139 &middot; 14-day returns &middot; Secure payment by Stripe</p>
@@ -191,6 +191,70 @@
         </picture>
       <!-- /picture:hero -->
       </figure>
+    </div>
+  </section>
+
+  <!-- ================================================================ band -->
+  <!--
+    Full-bleed statement panel, then the three key points.
+
+    The photo is optional. Until a wide landscape source exists at
+    site/assets/img/src/band.jpg, `npm run images` leaves the <picture> out and
+    the panel renders as a tinted gradient with the same copy over it — which
+    reads as a deliberate divider rather than a broken image frame. The scrim
+    sits above the photo either way, so the text keeps its contrast whichever
+    state the band is in.
+  -->
+  <section class="band" id="why" aria-labelledby="bandTitle">
+    <div class="band__media shot--band">
+      <!-- picture:band -->
+        <!-- No band photo yet. Add site/assets/img/src/band.jpg
+             (landscape, 2000px wide) and run npm run images. -->
+      <!-- /picture:band -->
+
+      <div class="band__scrim" aria-hidden="true"></div>
+
+      <div class="band__inner">
+        <span class="eyebrow">Why it works</span>
+        <h2 class="band__title" id="bandTitle">
+          The order matters more than the price of the mask.
+        </h2>
+        <p class="band__lede">
+          Warm the strand, then treat it, then let it cool. Ten minutes, once a
+          week &mdash; the sequence a salon uses, without the appointment.
+        </p>
+      </div>
+    </div>
+
+    <div class="wrap band__points">
+      <ol class="keypoints">
+        <li class="keypoint">
+          <span class="keypoint__num" aria-hidden="true">01</span>
+          <h3 class="keypoint__title">Steam and micro-vibration</h3>
+          <p>
+            Warm micro-steam is released through a three-layer rounded brush,
+            with a light micro-vibration behind it. Rounded tips mean it can
+            reach the scalp without scratching it.
+          </p>
+        </li>
+        <li class="keypoint">
+          <span class="keypoint__num" aria-hidden="true">02</span>
+          <h3 class="keypoint__title">Cordless, ten minutes</h3>
+          <p>
+            It charges over USB-C, so there is no cable at your neck and no
+            sink to lean over. One session a week is the whole commitment.
+          </p>
+        </li>
+        <li class="keypoint">
+          <span class="keypoint__num" aria-hidden="true">03</span>
+          <h3 class="keypoint__title">A cartridge you can refill</h3>
+          <p>
+            The oil cartridge carries argan kernel oil, caffeine and biotin and
+            diffuses them with the steam. Two come in the box; when one runs
+            out you swap the cartridge.
+          </p>
+        </li>
+      </ol>
     </div>
   </section>
 

@@ -71,10 +71,20 @@ for (const slot of SLOTS) {
     process.exit(1);
   }
 
-  const markup = pictureFor(slot);
+  let markup = pictureFor(slot);
   if (!markup) {
-    console.error(`\nNo manifest entry for "${slot.name}" — run npm run images first.\n`);
-    process.exit(1);
+    if (!slot.optional) {
+      console.error(`\nNo manifest entry for "${slot.name}" — run npm run images first.\n`);
+      process.exit(1);
+    }
+    // Leave a note where the <picture> would go, so the slot is discoverable
+    // from the markup instead of only from image-slots.js.
+    markup =
+      `        <!-- No ${slot.name} photo yet. Add site/assets/img/src/${slot.name}.jpg\n` +
+      `             (landscape, ${slot.recommendedWidth}px wide) and run npm run images. -->`;
+    html = html.slice(0, from + start.length) + '\n' + markup + '\n      ' + html.slice(to);
+    report.push(`  ${slot.name.padEnd(8)} no source — plain panel`);
+    continue;
   }
 
   html = html.slice(0, from + start.length) + '\n' + markup + '\n      ' + html.slice(to);

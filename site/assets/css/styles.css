@@ -317,6 +317,127 @@ a:hover { color: var(--accent-hover); }
   .hero__media img { aspect-ratio: 4 / 5; }
 }
 
+/* ---------------------------------------------------------------- band -----
+   Full-bleed panel between the hero and the problem section, followed by the
+   three key points on the page background.
+
+   Two things worth knowing before editing this:
+
+   - The panel must look finished with no photo behind it. The gradient below
+     is the resting state; scripts/build-images.mjs only writes a <picture>
+     into the markup once a wide source exists. So this is a design element
+     that can gain a photo, not an image frame waiting to be filled.
+
+   - .band__scrim is painted whether or not there is a photo, so the contrast
+     of the headline is the same in both states. Without it, a light photo
+     dropped in later would quietly make the text unreadable.               */
+
+.band { background: var(--cream); }
+
+.band__media {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: clamp(320px, 54vw, 500px);
+  overflow: hidden;
+  /* Resting state, and the backdrop the LQIP in placeholders.css replaces. */
+  background-color: var(--ink);
+  background-image:
+    radial-gradient(115% 85% at 14% 4%, rgba(168, 66, 63, 0.5), transparent 62%),
+    linear-gradient(158deg, #3b3029 0%, #241d19 56%, #181210 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+.band__media picture,
+.band__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.band__media img { object-fit: cover; }
+
+.band__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(20, 15, 12, 0.88) 0%,
+    rgba(20, 15, 12, 0.5) 46%,
+    rgba(20, 15, 12, 0.14) 100%
+  );
+}
+
+/* Lines up with .wrap so the headline shares the page's left edge. */
+.band__inner {
+  position: relative;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: clamp(2.5rem, 6vw, 4.25rem) var(--gutter);
+}
+
+.band .eyebrow { color: var(--gold); }
+
+.band__title {
+  color: var(--white);
+  max-width: 24ch;
+  margin-bottom: 0.45em;
+}
+
+.band__lede {
+  color: #ded5cb;
+  font-size: var(--step-1);
+  line-height: 1.5;
+  max-width: 44ch;
+  margin: 0;
+}
+
+/* ----------------------------------------------------------- key points ---- */
+
+.band__points { padding-block: clamp(2.5rem, 6vw, 4.25rem); }
+
+.keypoints {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: clamp(1.6rem, 3.5vw, 2.5rem);
+}
+
+@media (min-width: 760px) {
+  .keypoints { grid-template-columns: repeat(3, 1fr); }
+
+  /* Side by side, a one-line title next to a two-line one left the three
+     paragraphs starting at different heights. Reserving two lines in every
+     title keeps the body copy on one baseline. h3 line-height is 1.15. */
+  .keypoint__title { min-height: 2.3em; }
+}
+
+.keypoint {
+  border-block-start: 1px solid var(--sand);
+  padding-block-start: clamp(1rem, 2vw, 1.4rem);
+}
+
+.keypoint__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.9rem;
+  border: 1px solid var(--sand);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+.keypoint__title { font-size: var(--step-1); margin-bottom: 0.4em; }
+.keypoint p { margin: 0; color: var(--ink-soft); }
+
 /* -------------------------------------------------------------- gallery ---- */
 
 .gallery {
