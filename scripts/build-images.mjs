@@ -84,7 +84,7 @@ async function build() {
       if (!slot.optional) {
         warnings.push(`no source for "${slot.name}" — the page expects one`);
       } else {
-        console.log(`\n${slot.name}: no source yet — the page falls back to a plain panel`);
+        console.log(`\n${slot.name}: no source yet — that slide is simply left out`);
       }
       // Clear anything left from a previous source, otherwise the variants stay
       // on disk after the photo is removed and the markup keeps pointing at them.

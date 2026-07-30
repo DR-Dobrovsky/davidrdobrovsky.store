@@ -29,6 +29,25 @@ export const SHOP = {
 };
 
 /**
+ * LANGUAGES
+ * ------------------------------------------------------------------
+ * Only list a language once its pages actually exist at that path.
+ *
+ * The picker in the header is built from this list and stays hidden
+ * while there is only one entry, so it can never offer a language
+ * that the shop does not have. Adding a translation is then two
+ * steps: create the pages, add the line here.
+ *
+ * Belgium first when the time comes: nl, then fr.
+ */
+export const LOCALES = [
+  { code: 'en', label: 'English', path: '/' },
+  // { code: 'nl', label: 'Nederlands', path: '/nl/' },
+  // { code: 'fr', label: 'Fran\u00e7ais',  path: '/fr/' },
+  // { code: 'de', label: 'Deutsch',    path: '/de/' },
+];
+
+/**
  * Bundles shown on the page.
  *
  * id          — internal, also sent to Stripe as metadata

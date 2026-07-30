@@ -12,7 +12,7 @@
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
-import { SLOTS, FORMATS } from './image-slots.js';
+import { SLOTS, FORMATS, HERO_SLIDES } from './image-slots.js';
 
 const TARGET = 'site/index.html';
 const MANIFEST = 'site/assets/img/manifest.json';
@@ -59,7 +59,70 @@ ${sources}
 let replaced = 0;
 const report = [];
 
+/* ------------------------------------------------------- hero carousel ---- */
+
+/**
+ * The hero slides are written as a block rather than one marker per slide.
+ *
+ * With a marker per slide, a slot with no photo would leave an empty <figure>
+ * in the track — the carousel would advance onto blank frames. Generating the
+ * whole list means the number of slides always equals the number of photos
+ * that exist, which is also what main.js counts to decide whether to show any
+ * controls at all.
+ */
+function fillHeroCarousel() {
+  const start = '<!-- carousel:hero -->';
+  const end = '<!-- /carousel:hero -->';
+  const from = html.indexOf(start);
+  const to = html.indexOf(end);
+
+  if (from === -1 || to === -1) {
+    console.error(`\nCarousel markers missing in ${TARGET}.`);
+    console.error(`Expected ${start} ... ${end}\n`);
+    process.exit(1);
+  }
+
+  const present = HERO_SLIDES.map((name) => SLOTS.find((s) => s.name === name)).filter(
+    (slot) => slot && manifest[slot.name]
+  );
+
+  if (present.length === 0) {
+    console.error('\nNo hero photo at all — site/assets/img/src/hero.jpg is required.\n');
+    process.exit(1);
+  }
+
+  const slides = present
+    .map((slot, i) => {
+      // Only the first slide is worth eager-loading; the rest are off-screen.
+      const slide = { ...slot, priority: i === 0 && Boolean(slot.priority) };
+      return `        <figure class="carousel__slide shot--${slot.name}" role="group"
+                aria-roledescription="slide"
+                aria-label="Photo ${i + 1} of ${present.length}">
+${pictureFor(slide)}
+        </figure>`;
+    })
+    .join('\n');
+
+  html = html.slice(0, from + start.length) + '\n' + slides + '\n          ' + html.slice(to);
+
+  replaced += present.length;
+  const missing = HERO_SLIDES.filter((n) => !manifest[n]);
+  report.push(
+    `  hero     ${present.length} slide${present.length === 1 ? '' : 's'} ` +
+      `(${present.map((s) => s.name).join(', ')})` +
+      (missing.length ? `  — still free: ${missing.join(', ')}` : '')
+  );
+}
+
+fillHeroCarousel();
+
+/* --------------------------------------------------- the remaining slots -- */
+
+const heroSlideNames = new Set(HERO_SLIDES);
+
 for (const slot of SLOTS) {
+  if (heroSlideNames.has(slot.name)) continue; // handled by fillHeroCarousel
+
   const start = `<!-- picture:${slot.name} -->`;
   const end = `<!-- /picture:${slot.name} -->`;
   const from = html.indexOf(start);
@@ -81,9 +144,9 @@ for (const slot of SLOTS) {
     // from the markup instead of only from image-slots.js.
     markup =
       `        <!-- No ${slot.name} photo yet. Add site/assets/img/src/${slot.name}.jpg\n` +
-      `             (landscape, ${slot.recommendedWidth}px wide) and run npm run images. -->`;
+      `             (${slot.recommendedWidth}px wide) and run npm run images. -->`;
     html = html.slice(0, from + start.length) + '\n' + markup + '\n      ' + html.slice(to);
-    report.push(`  ${slot.name.padEnd(8)} no source — plain panel`);
+    report.push(`  ${slot.name.padEnd(8)} no source yet`);
     continue;
   }
 
