@@ -119,12 +119,6 @@ a:hover { color: var(--accent-hover); }
 }
 .fine-print--loose { margin-top: 2.5rem; }
 
-.cookie__title {
-  margin: 0 0 0.5rem;
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-}
-
 .visually-hidden {
   position: absolute;
   width: 1px; height: 1px;
@@ -221,8 +215,13 @@ a:hover { color: var(--accent-hover); }
 @media (max-width: 780px) { .nav { display: none; } }
 
 /* language switcher */
+/* The menu is a sibling of the button, so the wrapper has to be the positioned
+   ancestor. Without it the dropdown anchored itself to .header and only looked
+   right by coincidence, because the button happens to sit at the same edge. */
+.lang-picker { position: relative; }
+.lang-picker[hidden] { display: none; }
+
 .lang {
-  position: relative;
   display: inline-flex; align-items: center; gap: 0.35rem;
   background: transparent; border: 1px solid rgba(42, 35, 31, 0.18);
   border-radius: 999px; padding: 0.32rem 0.7rem;
@@ -237,13 +236,16 @@ a:hover { color: var(--accent-hover); }
   list-style: none; margin: 0; display: none;
 }
 .lang__menu[data-open='true'] { display: block; }
-.lang__menu button {
+/* Links, not buttons: switching language is navigation to another page, so it
+   should behave like one — middle-click, open in a new tab, and work without
+   JavaScript once the translated pages exist. */
+.lang__menu a {
   display: block; width: 100%; text-align: left;
-  background: none; border: 0; cursor: pointer;
-  padding: 0.5rem 0.7rem; border-radius: 8px; font-size: var(--step--1);
+  padding: 0.5rem 0.7rem; border-radius: 8px;
+  font-size: var(--step--1); color: var(--ink); text-decoration: none;
 }
-.lang__menu button:hover { background: var(--cream-deep); }
-.lang__menu button[aria-current='true'] { color: var(--accent); font-weight: 600; }
+.lang__menu a:hover { background: var(--cream-deep); color: var(--ink); }
+.lang__menu a[aria-current='true'] { color: var(--accent); font-weight: 600; }
 
 /* --------------------------------------------------------------- hero ----- */
 
@@ -307,14 +309,144 @@ a:hover { color: var(--accent-hover); }
   .shot img { animation: none; }
 }
 
+/* 4:5 at every width. A 1:1 crop was tried on phones to keep the price higher
+   up the page, but it made the product too small on exactly the device where
+   the photo has to do the selling. */
 .hero__media { aspect-ratio: 4 / 5; }
 
-/* On phones the hero gets the full 4:5 frame. A 1:1 crop was tried to keep the
-   price higher up the page, but it made the product too small on exactly the
-   device where the photo has to do the selling. */
-@media (max-width: 899px) {
-  .hero__media { aspect-ratio: 4 / 5; }
-  .hero__media img { aspect-ratio: 4 / 5; }
+/* ------------------------------------------------------------- carousel ----
+   The hero is a scroll-snap strip, not a transform slider. Swiping, momentum
+   and snapping are then the browser's own, which is both less code and better
+   behaved on a phone; with JavaScript off it degrades to a scrollable row of
+   photos rather than a dead first slide.
+
+   Dots, arrows and the pause button are built by main.js and only when there
+   is more than one slide, so a single photo shows no controls and never moves.
+   Anything that autoplays needs a way to stop it — that is what the toggle in
+   the corner is for, not decoration.                                        */
+
+.carousel {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--cream-deep);
+  box-shadow: var(--shadow);
+}
+
+.carousel__track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  /* The strip is driven by dots and swipes; a visible bar across the photo
+     would only be chrome. Keyboard users get the arrow keys instead. */
+  scrollbar-width: none;
+}
+.carousel__track::-webkit-scrollbar { display: none; }
+
+.carousel__slide {
+  flex: 0 0 100%;
+  height: 100%;
+  margin: 0;
+  scroll-snap-align: start;
+  /* The blurred stand-in from placeholders.css, per slide. */
+  background-size: cover;
+  background-position: center;
+}
+
+.carousel__slide picture,
+.carousel__slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.carousel__slide img {
+  object-fit: cover;
+  animation: photo-in 0.45s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel__slide img { animation: none; }
+}
+
+/* --- controls -------------------------------------------------------------- */
+
+.carousel__ui {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  /* Dots have to stay visible over a pale photo as well as a dark one. */
+  background: linear-gradient(to top, rgba(20, 15, 12, 0.5), transparent);
+  pointer-events: none;
+}
+.carousel__ui:empty { display: none; }
+.carousel__ui > * { pointer-events: auto; }
+
+/* 28px of hit area around an 8px dot: the dot is the mark, not the target. */
+.carousel__dot {
+  width: 28px; height: 28px; padding: 0;
+  display: grid; place-items: center;
+  background: none; border: 0; cursor: pointer;
+}
+.carousel__dot::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+.carousel__dot[aria-current='true']::before {
+  width: 22px;
+  background: var(--white);
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel__dot::before { transition: none; }
+}
+
+.carousel__toggle {
+  position: absolute;
+  top: 0.7rem; inset-inline-end: 0.7rem;
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: rgba(20, 15, 12, 0.5);
+  color: var(--white);
+  cursor: pointer;
+}
+.carousel__toggle:hover { background: rgba(20, 15, 12, 0.72); }
+
+.carousel__arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  width: 40px; height: 40px;
+  display: none;
+  place-items: center;
+  border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(42, 35, 31, 0.18);
+}
+.carousel__arrow:hover { background: var(--white); }
+.carousel__arrow[disabled] { opacity: 0; pointer-events: none; }
+.carousel__arrow--prev { inset-inline-start: 0.7rem; }
+.carousel__arrow--next { inset-inline-end: 0.7rem; }
+
+/* Arrows from 900px up, and deliberately not gated on `pointer: fine`.
+   That query looks like the right way to say "only for mice", but a browser
+   that reports `pointer: none` — headless Chrome does, and so do some embedded
+   webviews — would then get no arrows at all. Gating navigation on a capability
+   query fails silently and in the direction that removes function, so width
+   alone decides. On a touch screen the swipe still works; two small buttons
+   over the corner of the photo cost nothing. */
+@media (min-width: 900px) {
+  .carousel__arrow { display: grid; }
 }
 
 /* -------------------------------------------------------------- gallery ---- */
@@ -726,20 +858,66 @@ a:hover { color: var(--accent-hover); }
 
 /* -------------------------------------------------------------- cookies --- */
 
+/* A bar across the bottom, not a floating card.
+   It used to be a white rounded card 1rem off the bottom edge, 198px tall on a
+   390px screen. Two problems: white on cream barely read as a separate surface,
+   and at that height it sat squarely on top of both hero buttons. Dark, full
+   width and as short as the text allows fixes the first and limits the second.
+
+   A consent bar covers the bottom of the screen by definition — the fix for
+   that is being quick to read and quick to dismiss, not moving it elsewhere. */
+
 .cookie {
-  position: fixed; inset-inline: 1rem; bottom: 1rem; z-index: 150;
-  max-width: 460px; margin-inline: auto;
-  background: var(--white); color: var(--ink);
-  border: 1px solid rgba(42, 35, 31, 0.14);
-  border-radius: var(--radius-lg);
-  padding: 1.3rem;
-  box-shadow: var(--shadow-lift);
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 150;
   display: none;
+  background: var(--ink);
+  color: #d8cec4;
+  border-block-start: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 -8px 30px rgba(42, 35, 31, 0.25);
+  padding: 0.85rem var(--gutter);
+  /* Clear of the home indicator on a phone. */
+  padding-bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
 }
 .cookie[data-visible='true'] { display: block; }
-.cookie p { font-size: var(--step--1); margin-bottom: 1rem; }
-.cookie__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-.cookie .btn { padding: 0.65rem 1.3rem; font-size: var(--step--1); }
+
+.cookie__inner {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  display: grid;
+  gap: 0.7rem;
+}
+@media (min-width: 720px) {
+  .cookie__inner {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+  }
+}
+
+.cookie p { font-size: var(--step--1); line-height: 1.5; margin: 0; max-width: 68ch; }
+.cookie a { color: var(--gold); }
+
+.cookie__actions { display: flex; gap: 0.6rem; }
+.cookie .btn {
+  padding: 0.7rem 1.4rem;
+  font-size: var(--step--1);
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+@media (min-width: 720px) {
+  .cookie .btn { flex: 0 0 auto; }
+}
+
+/* The default ghost button is dark ink on light; on this bar it is the reverse. */
+.cookie .btn--ghost { --btn-fg: var(--cream-deep); border-color: rgba(255, 255, 255, 0.32); }
+.cookie .btn--ghost:hover {
+  --btn-bg: rgba(255, 255, 255, 0.12);
+  --btn-fg: var(--white);
+  border-color: rgba(255, 255, 255, 0.5);
+}
 
 /* ---------------------------------------------------------- legal pages --- */
 

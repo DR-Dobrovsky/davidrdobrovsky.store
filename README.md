@@ -53,7 +53,8 @@ nothing until those variants are rebuilt.
 
 1. Go to `site/assets/img/src/` on GitHub
 2. **Add file → Upload files**, and upload your photo named exactly
-   `hero.jpg`, `in-use.jpg`, `device.jpg` or `set.jpg`
+   `hero.jpg`, `hero-1.jpg`, `hero-2.jpg`, `hero-3.jpg`, `in-use.jpg`,
+   `device.jpg` or `set.jpg`
 3. Commit
 
 The **Build images** workflow then regenerates every size and format, the
@@ -83,6 +84,24 @@ git commit -am "New photos"
 | `in-use.jpg` | 4:5 | 1200 px | Close-up of the brush head against the scalp. |
 | `device.jpg` | 4:5 | 1200 px | The device alone, angled, soft shadow. |
 | `set.jpg` | 4:5 | 1200 px | The full Rescue Ritual, device plus the three bottles. |
+| `hero-1.jpg` | 4:5 | 1600 px | *Optional.* Second slide of the hero carousel. |
+| `hero-2.jpg` | 4:5 | 1600 px | *Optional.* Third slide. |
+| `hero-3.jpg` | 4:5 | 1600 px | *Optional.* Fourth slide. |
+
+### The hero carousel
+
+`hero.jpg` is the first slide and the only required photo. `hero-1`, `hero-2`
+and `hero-3` are optional: each one that exists becomes another slide, and the
+number of slides is generated from what is on disk, never hand-written.
+
+With one photo the hero is a still image — no dots, no arrows, no autoplay,
+because there is nowhere to go. From two photos up it advances every 3 seconds,
+walking to the last slide and back rather than wrapping around, and a pause
+button appears in the corner. Nothing autoplays for a visitor whose system asks
+for reduced motion.
+
+So you can add photos one at a time and the hero keeps working at every step.
+
 
 Keep one file per slot — `hero.jpg` **and** `hero.png` together is rejected,
 because both would build into the same variants. Keep the 4:5 ratio: the layout

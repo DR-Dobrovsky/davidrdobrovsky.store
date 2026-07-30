@@ -11,7 +11,7 @@
  * Stripe Price ID, so a user editing the DOM cannot change what they pay.
  */
 
-import { SHOP, BUNDLES } from './config.js';
+import { SHOP, BUNDLES, LOCALES } from './config.js';
 import { bundleCard, makeMoney } from './bundle-markup.js';
 
 /* ------------------------------------------------------------------ utils */
@@ -133,10 +133,45 @@ function wireCookieBar() {
 
 /* ------------------------------------------------------------- language */
 
+/**
+ * Language picker.
+ *
+ * The previous version listed four languages and, when one was chosen, set
+ * html[lang] and the button label and nothing else — the page stayed English.
+ * So it claimed a language the text was not in, which also made screen readers
+ * read English with the wrong phonetics.
+ *
+ * Now the list comes from LOCALES in config.js, entries are real links, and the
+ * control is only revealed when there is somewhere to go. Adding a translation
+ * means creating the pages and uncommenting a line, with no change here.
+ */
 function wireLanguage() {
+  const picker = $('#langPicker');
   const btn = $('#langBtn');
   const menu = $('#langMenu');
-  if (!btn || !menu) return;
+  if (!picker || !btn || !menu) return;
+
+  const current =
+    LOCALES.find((l) => l.code === document.documentElement.lang) ?? LOCALES[0];
+
+  // One language is not a choice. Leave the control hidden rather than show a
+  // dropdown whose only entry is the page you are already on.
+  if (LOCALES.length < 2 || !current) return;
+
+  menu.innerHTML = '';
+  for (const locale of LOCALES) {
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = locale.path;
+    link.hreflang = locale.code;
+    link.textContent = locale.label;
+    if (locale.code === current.code) link.setAttribute('aria-current', 'true');
+    item.append(link);
+    menu.append(item);
+  }
+
+  $('#langCurrent').textContent = current.code.toUpperCase();
+  picker.hidden = false;
 
   const close = () => {
     menu.dataset.open = 'false';
@@ -148,21 +183,6 @@ function wireLanguage() {
     const open = menu.dataset.open === 'true';
     menu.dataset.open = String(!open);
     btn.setAttribute('aria-expanded', String(!open));
-  });
-
-  menu.addEventListener('click', (event) => {
-    const choice = event.target.closest('[data-lang]');
-    if (!choice) return;
-    const lang = choice.dataset.lang;
-
-    // Translations are not built yet. English is served for every locale;
-    // when /nl/, /fr/, /de/ exist, redirect there instead of this no-op.
-    $('#langCurrent').textContent = lang.toUpperCase();
-    menu.querySelectorAll('[data-lang]').forEach((b) => {
-      b.setAttribute('aria-current', String(b.dataset.lang === lang));
-    });
-    document.documentElement.lang = lang;
-    close();
   });
 
   document.addEventListener('click', close);
@@ -199,6 +219,173 @@ function logMargins() {
     'Break-even CPA = the most you can pay per purchase in ads before losing money.'
   );
   console.groupEnd();
+}
+
+/* ------------------------------------------------------------- carousel --- */
+
+const ICON = {
+  pause: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>',
+  play: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
+  prev: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+  next: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+};
+
+/**
+ * Hero carousel.
+ *
+ * Position is read from and written to the track's scrollLeft rather than kept
+ * in a variable: the strip is scroll-snapped, so a swipe moves it without this
+ * code being involved, and any state we kept alongside would drift out of sync
+ * with what the visitor can see.
+ *
+ * Autoplay walks to the end and then back rather than wrapping around. Wrapping
+ * means a smooth-scroll all the way from the last slide to the first, which
+ * reads as the page rewinding itself every few seconds.
+ *
+ * Nothing autoplays if the visitor asked for reduced motion, and the pause
+ * button exists so that an animation which starts on its own can always be
+ * stopped — that is a requirement, not a nicety.
+ */
+function wireCarousel() {
+  const root = $('.carousel');
+  if (!root) return;
+
+  const track = $('.carousel__track', root);
+  const ui = $('.carousel__ui', root);
+  const slides = root.querySelectorAll('.carousel__slide');
+
+  // One photo is not a carousel: no controls, no timer, nothing to announce.
+  if (!track || !ui || slides.length < 2) return;
+
+  const count = slides.length;
+  const interval = Number(root.dataset.interval) || 3000;
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+  let index = 0;
+  let step = 1; // direction of travel, flipped at either end
+  let timer = null;
+  let resume = null;
+  let stopped = reduceMotion; // the visitor's standing choice
+
+  const at = () =>
+    track.clientWidth ? Math.round(track.scrollLeft / track.clientWidth) : 0;
+
+  const dots = [];
+  for (let i = 0; i < count; i += 1) {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'carousel__dot';
+    dot.setAttribute('aria-label', `Photo ${i + 1} of ${count}`);
+    dot.addEventListener('click', () => {
+      hold();
+      go(i);
+    });
+    dots.push(dot);
+    ui.append(dot);
+  }
+
+  const arrow = (kind, label, delta) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `carousel__arrow carousel__arrow--${kind}`;
+    button.innerHTML = ICON[kind];
+    button.setAttribute('aria-label', label);
+    button.addEventListener('click', () => {
+      hold();
+      go(at() + delta);
+    });
+    root.append(button);
+    return button;
+  };
+  const prev = arrow('prev', 'Previous photo', -1);
+  const next = arrow('next', 'Next photo', 1);
+
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'carousel__toggle';
+  root.append(toggle);
+
+  function paintToggle() {
+    toggle.innerHTML = stopped ? ICON.play : ICON.pause;
+    toggle.setAttribute('aria-label', stopped ? 'Play the photos' : 'Pause the photos');
+    toggle.setAttribute('aria-pressed', String(stopped));
+  }
+
+  function sync() {
+    index = at();
+    dots.forEach((dot, i) => dot.setAttribute('aria-current', String(i === index)));
+    prev.disabled = index === 0;
+    next.disabled = index === count - 1;
+  }
+
+  function go(to) {
+    const target = Math.max(0, Math.min(count - 1, to));
+    track.scrollTo({
+      left: track.clientWidth * target,
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    });
+  }
+
+  function tick() {
+    const here = at();
+    if (here >= count - 1) step = -1;
+    if (here <= 0) step = 1;
+    go(here + step);
+  }
+
+  function play() {
+    stop();
+    if (stopped || document.hidden) return;
+    timer = setInterval(tick, interval);
+  }
+
+  function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  /**
+   * Step back for a while after the visitor moves the carousel themselves.
+   * Killing autoplay outright on any scroll would let one stray swipe disable
+   * it for the rest of the visit; carrying on immediately would fight them for
+   * control of the thing they are looking at.
+   */
+  function hold(ms = 7000) {
+    stop();
+    clearTimeout(resume);
+    resume = setTimeout(play, ms);
+  }
+
+  toggle.addEventListener('click', () => {
+    stopped = !stopped;
+    clearTimeout(resume);
+    paintToggle();
+    if (stopped) stop();
+    else play();
+  });
+
+  track.addEventListener('scroll', sync, { passive: true });
+  track.addEventListener('pointerdown', () => hold(), { passive: true });
+
+  root.addEventListener('pointerenter', stop);
+  root.addEventListener('pointerleave', play);
+  root.addEventListener('focusin', stop);
+  root.addEventListener('focusout', play);
+
+  root.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    hold();
+    go(at() + (event.key === 'ArrowRight' ? 1 : -1));
+  });
+
+  // A timer that keeps firing in a background tab wastes battery and, worse,
+  // the visitor comes back to a photo they never chose.
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()));
+
+  paintToggle();
+  sync();
+  play();
 }
 
 /* --------------------------------------------------------------- clips --- */
@@ -258,6 +445,7 @@ function init() {
   wireCheckout();
   wireCookieBar();
   wireLanguage();
+  wireCarousel();
   wireClips();
 
   const year = $('#year');

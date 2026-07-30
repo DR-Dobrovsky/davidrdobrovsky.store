@@ -79,7 +79,19 @@ async function build() {
   for (const slot of SLOTS) {
     const file = bySlot.get(slot.name)?.[0];
     if (!file) {
-      warnings.push(`no source for "${slot.name}" — the page expects one`);
+      // An optional slot has a CSS-only fallback on the page, so a missing
+      // source is a normal state, not a problem to report every build.
+      if (!slot.optional) {
+        warnings.push(`no source for "${slot.name}" — the page expects one`);
+      } else {
+        console.log(`\n${slot.name}: no source yet — that slide is simply left out`);
+      }
+      // Clear anything left from a previous source, otherwise the variants stay
+      // on disk after the photo is removed and the markup keeps pointing at them.
+      const orphaned = existing.filter((f) =>
+        new RegExp(`^${slot.name}-\\d+\\.(avif|webp|jpg)$`).test(f)
+      );
+      for (const f of orphaned) await unlink(join(OUT_DIR, f));
       continue;
     }
 

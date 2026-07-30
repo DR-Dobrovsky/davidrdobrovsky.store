@@ -25,6 +25,13 @@ since both map to the same output name.
 | `in-use.jpg` | 4:5 | 1200 px | Close-up of the brush head against the scalp, steam visible. |
 | `device.jpg` | 4:5 | 1200 px | The device alone, floating or angled, soft shadow, warm neutral background. |
 | `set.jpg` | 4:5 | 1200 px | The full Rescue Ritual laid out: device plus the three Growus bottles. |
+| `hero-1.jpg` | 4:5 | 1600 px | *Optional.* Slide 2 of the hero carousel. |
+| `hero-2.jpg` | 4:5 | 1600 px | *Optional.* Slide 3. |
+| `hero-3.jpg` | 4:5 | 1600 px | *Optional.* Slide 4. |
+
+The hero carousel is built from whichever `hero*.jpg` files exist. One photo
+means a still hero with no controls; two or more turn it into a carousel that
+advances every 3 seconds. Add them one at a time — nothing breaks in between.
 
 Keep the ratio consistent at 4:5. The layout reserves that space, so a
 different ratio will letterbox or crop.
