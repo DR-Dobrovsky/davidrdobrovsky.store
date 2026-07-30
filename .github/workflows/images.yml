@@ -44,9 +44,17 @@ jobs:
       - name: Generate image variants
         run: npm run images
 
+      - name: Check the result is consistent
+        run: npm run test:images
+
       - name: Commit the generated files
         run: |
-          if git diff --quiet -- site/assets/img site/assets/css/placeholders.css; then
+          # index.html is included because the <picture> markup is generated
+          # from the widths that were actually built — if it were left out, the
+          # page could reference variants that no longer exist.
+          PATHS="site/assets/img site/assets/css/placeholders.css site/index.html"
+
+          if git diff --quiet -- $PATHS; then
             echo "Nothing changed — the variants were already up to date."
             exit 0
           fi
@@ -54,7 +62,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add site/assets/img site/assets/css/placeholders.css
+          git add $PATHS
           git commit -m "Rebuild image variants [skip ci]"
           git push
 
